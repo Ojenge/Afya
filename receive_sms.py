@@ -32,6 +32,7 @@ def receive_sms():
     # the reply to be sent.
     r = plivoxml.Response()
     r.addMessage(body, **params)
+    print r
     return r.to_xml()
 
 @app.route("/report/", methods=['GET','POST'])
