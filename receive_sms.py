@@ -27,6 +27,7 @@ def receive_sms():
     }
     body = "Thanks, we've received your message."
 
+    print params
     # Generate a Message XML with the details of
     # the reply to be sent.
     r = plivoxml.Response()
