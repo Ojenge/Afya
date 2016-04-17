@@ -1,4 +1,5 @@
 import plivo, plivoxml
+import os
 from flask import Flask, request
 
 
@@ -41,7 +42,11 @@ def receive_sms():
     return ret_response
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port,debug=True)
+#if __name__ == "__main__":
+#    port = int(os.environ.get("PORT", 5000))
+#    app.run(host='0.0.0.0', port=port)
 
 # Sample successful output
 # Text received: Hello, from Plivo - From: 2222222222
