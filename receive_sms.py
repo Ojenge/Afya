@@ -19,7 +19,7 @@ def receive_sms():
     
     # Print the message
     print 'Text received: %s - From: %s' % (text, from_number)
-    return "Text received"
+    #return "Text received"
 
     params = {
       "src": to_number,
