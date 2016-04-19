@@ -20,20 +20,28 @@ def receive_sms():
     # Print the message
     print 'Text received: %s - From: %s' % (text, from_number)
     #return "Text received"
+    # Generate a Message XML with the details of the reply to be sent.
 
+    resp = plivoxml.Response()
+
+    body = 'Thank you for your message'
     params = {
-      "src": to_number,
-      "dst": from_number,
+    'src' : to_number, # Sender's phone number
+    'dst' : from_number, # Receiver's phone Number
+    'callbackUrl': "http://afya.herokuapp.com/report/", # URL that is notified by Plivo when a response is available and to which the response is sent
+    'callbackMethod' : "GET" # The method used to notify the callbackUrl
     }
-    body = "Thanks, we've received your message."
 
-    print params
-    # Generate a Message XML with the details of
-    # the reply to be sent.
-    r = plivoxml.Response()
-    r.addMessage(body, **params)
-    print r
-    return r.to_xml()
+    # Message added
+    resp.addMessage(body, **params)
+
+    ret_response = make_response(resp.to_xml())
+    ret_response.headers["Content-type"] = "text/xml"
+
+    # Prints the XML
+    print resp.to_xml()
+    # Returns the XML
+    return ret_response
 
 @app.route("/report/", methods=['GET','POST'])
 def report():
