@@ -8,6 +8,7 @@ from watson_developer_cloud import WatsonException
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
 db = SQLAlchemy(app)
 
 class Messages(db.Model):
@@ -48,7 +49,6 @@ def receive_sms():
     try:
         dialog = DialogUtils(app)
         dialogid = dialog.getDialogs()
-        dialogid = "cf64776f-884d-42fd-ac58-c230673f2816"
         if not db.session.query(Messages).filter(Messages.number == from_number).count():
             dialogid = dialog.createDialog(dialog_file, from_number)
             message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
@@ -61,6 +61,8 @@ def receive_sms():
         else:
            #we will need to filter the dialog id based on the number
            # we have been having a conversation already
+            dialogid = Messages.query.filter(Messages.number == from_number).first().dialogid
+            print dialogid
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
             print response['client_id']
