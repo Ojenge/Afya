@@ -7,7 +7,6 @@ from watsonutils.dialog import DialogUtils
 from watson_developer_cloud import WatsonException
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/afya'
 db = SQLAlchemy(app)
 
 class Messages(db.Model):
