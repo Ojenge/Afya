@@ -63,7 +63,8 @@ def receive_sms():
            # we have been having a conversation already
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
-            answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=text, conversation_id=response['conversation_id'])
+            print response['client_id']
+            answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=text, conversation_id=response['conversation_id'], client_id=response['client_id'])
             print answer
             responses = answer['response']
             if len(responses) > 1:
