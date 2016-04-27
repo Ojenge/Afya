@@ -67,9 +67,9 @@ def receive_sms():
             print answer
             responses = answer['response']
             if len(responses) > 1:
-                text = responses[1]
+                body = responses[1]
             else:
-                text = responses[0]
+                body = responses[0]
     except WatsonException as err:
         print err 
 
