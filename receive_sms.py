@@ -5,7 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 from watsonutils.dialog import DialogUtils
 from watson_developer_cloud import WatsonException
-from .models import Messages
+from models import Messages
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
