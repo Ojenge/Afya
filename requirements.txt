@@ -6,3 +6,4 @@ itsdangerous==0.24
 plivo==0.11.0
 requests==2.9.1
 wsgiref==0.1.2
+watson-developer-cloud

@@ -2,6 +2,7 @@ import plivo, plivoxml
 import os
 from flask import Flask, request, make_response
 
+from watsonutils.dialog import DialogUtils
 
 app = Flask(__name__)
 
