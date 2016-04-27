@@ -48,7 +48,7 @@ def receive_sms():
         dialogid = dialog.getDialogs()
         dialogid = "cf64776f-884d-42fd-ac58-c230673f2816"
         if not db.session.query(Messages).filter(Messages.number == from_number).count():
-            dialogid = dialog.createDialog(dialog_file, 'pizzasample')
+            dialogid = dialog.createDialog(dialog_file, from_number)
             message = Messages(text,dialogid,number=from_number)
             db.session.add(message)
             db.session.commit()
