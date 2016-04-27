@@ -18,8 +18,10 @@ class Messages(db.Model):
     dialogid = db.Column(db.String())
     number = db.Column(db.String(120), unique=True)
 
-    def __init__(self, dialogid):
+    def __init__(self, message, dialogid, number):
         self.dialogid= dialogid
+        self.message = message
+        self.number = number
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
