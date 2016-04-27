@@ -47,6 +47,7 @@ def receive_sms():
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
             answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=text, conversation_id=response['conversation_id'])
+            print answer
     except WatsonException as err:
         print err 
 
