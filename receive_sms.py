@@ -22,10 +22,20 @@ def receive_sms():
     print 'Text received: %s - From: %s' % (text, from_number)
     #return "Text received"
     # Generate a Message XML with the details of the reply to be sent.
+    dialog_file = open("resources/pizza_sample.xml", 'r')
+    body = 'Thank you for your message'
+    try:
+        dialog = DialogUtils(app)
+        dialogid = dialog.createDialog(dialog_file, 'pizzasample')
+        print dialogid
+        response = dialog.getConversation(dialogid)
+        print response['conversation_id']
+        body = response['response'][0]
+    except WatsonException as err:
+        print err 
 
     resp = plivoxml.Response()
 
-    body = 'Thank you for your message'
     params = {
     'src' : to_number, # Sender's phone number
     'dst' : from_number, # Receiver's phone Number
