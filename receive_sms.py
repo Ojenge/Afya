@@ -5,10 +5,25 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 from watsonutils.dialog import DialogUtils
 from watson_developer_cloud import WatsonException
-from models import Messages
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/afya'
 db = SQLAlchemy(app)
+
+class Messages(db.Model):
+    __tablename__ = 'messages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String())
+    dialogid = db.Column(db.String())
+    number = db.Column(db.String(120), unique=True)
+
+    def __init__(self, dialogid):
+        self.dialogid= dialogid
+
+    def __repr__(self):
+        return '<id {}>'.format(self.id)
+
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
