@@ -27,7 +27,8 @@ def receive_sms():
     body = 'Thank you for your message'
     try:
         dialog = DialogUtils(app)
-        dialogid = dialog.createDialog(dialog_file, 'pizzasample')
+        dialogid = dialog.getDialogs()
+        #dialogid = dialog.createDialog(dialog_file, 'pizzasample')
         print dialogid
         response = dialog.getConversation(dialogid)
         print response['conversation_id']
