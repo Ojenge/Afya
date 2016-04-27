@@ -54,7 +54,7 @@ def receive_sms():
             message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
             db.session.add(message)
             db.session.commit()
-            print dialogid
+            dialogid = dialogid['dialog_id']
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
             body = response['response'][0]
