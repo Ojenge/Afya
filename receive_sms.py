@@ -1,11 +1,14 @@
 import plivo, plivoxml
 import os
 from flask import Flask, request, make_response
+from flask.ext.sqlalchemy import SQLAlchemy
 
 from watsonutils.dialog import DialogUtils
 from watson_developer_cloud import WatsonException
+from .models import Messages
 
 app = Flask(__name__)
+db = SQLAlchemy(app)
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
@@ -29,11 +32,21 @@ def receive_sms():
         dialog = DialogUtils(app)
         dialogid = dialog.getDialogs()
         dialogid = "cf64776f-884d-42fd-ac58-c230673f2816"
-        #dialogid = dialog.createDialog(dialog_file, 'pizzasample')
-        print dialogid
-        response = dialog.getConversation(dialogid)
-        print response['conversation_id']
-        body = response['response'][0]
+        if not db.session.query(Messages).filter(Messages.number == from_number).count():
+            dialogid = dialog.createDialog(dialog_file, 'pizzasample')
+            message = Messages(text,dialogid,number=from_number)
+            db.session.add(message)
+            db.session.commit()
+            print dialogid
+            response = dialog.getConversation(dialogid)
+            print response['conversation_id']
+            body = response['response'][0]
+        else:
+           #we will need to filter the dialog id based on the number
+           # we have been having a conversation already
+            response = dialog.getConversation(dialogid)
+            print response['conversation_id']
+            answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=text, conversation_id=response['conversation_id'])
     except WatsonException as err:
         print err 
 
