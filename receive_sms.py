@@ -3,6 +3,7 @@ import os
 from flask import Flask, request, make_response
 
 from watsonutils.dialog import DialogUtils
+from watson_developer_cloud import WatsonException
 
 app = Flask(__name__)
 
