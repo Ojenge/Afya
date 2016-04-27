@@ -28,6 +28,7 @@ def receive_sms():
     try:
         dialog = DialogUtils(app)
         dialogid = dialog.getDialogs()
+        dialogid = "cf64776f-884d-42fd-ac58-c230673f2816"
         #dialogid = dialog.createDialog(dialog_file, 'pizzasample')
         print dialogid
         response = dialog.getConversation(dialogid)
