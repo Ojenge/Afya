@@ -7,8 +7,9 @@ from watsonutils.dialog import DialogUtils
 from watson_developer_cloud import WatsonException
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
+##app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
+
 db = SQLAlchemy(app)
 
 class Messages(db.Model):
@@ -17,7 +18,7 @@ class Messages(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String())
     dialogid = db.Column(db.String())
-    number = db.Column(db.String(120), unique=True)
+    number = db.Column(db.String(120))
 
     def __init__(self, message, dialogid, number):
         self.dialogid= dialogid
@@ -62,10 +63,18 @@ def receive_sms():
            #we will need to filter the dialog id based on the number
            # we have been having a conversation already
             dialogid = Messages.query.filter(Messages.number == from_number).first().dialogid
+            search_text = Messages.query.filter(Messages.text == text)
+            if search_text:
+                print search_text
+                # means it exists so we create it
+                message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
+                db.session.add(message)
+                db.session.commit()
             print dialogid
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
             print response['client_id']
+            message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
             answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=text, conversation_id=response['conversation_id'], client_id=response['client_id'])
             print answer
             responses = answer['response']
