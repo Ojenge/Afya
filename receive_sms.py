@@ -83,12 +83,12 @@ def receive_sms():
                 print message.message
                 ##answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=message['message'], conversation_id=response['conversation_id'], client_id=response['client_id'])
                 ##print answer
-            responses = answer['response']
-            if len(responses) > 1:
-                responses = filter(None, responses)
-                body = responses[0]
-            else:
-                body = responses[0]
+            ##responses = answer['response']
+            ##if len(responses) > 1:
+            ##    responses = filter(None, responses)
+            ##    body = responses[0]
+            ##else:
+            ##    body = responses[0]
     except WatsonException as err:
         print err 
 
