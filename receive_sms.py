@@ -7,8 +7,8 @@ from watsonutils.dialog import DialogUtils
 from watson_developer_cloud import WatsonException
 
 app = Flask(__name__)
-##app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+##app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
 
 db = SQLAlchemy(app)
 
