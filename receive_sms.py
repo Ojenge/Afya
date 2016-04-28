@@ -80,7 +80,7 @@ def receive_sms():
             messages = Messages.query.filter(Messages.number == from_number).all()
             for message in messages:
                 print message
-                answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=message['message'], conversation_id=response['conversation_id'], client_id=response['client_id'])
+                ##answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=message['message'], conversation_id=response['conversation_id'], client_id=response['client_id'])
                 print answer
             responses = answer['response']
             if len(responses) > 1:
