@@ -79,7 +79,8 @@ def receive_sms():
             #message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
             messages = Messages.query.filter(Messages.number == from_number).all()
             for message in messages:
-                print message
+                print "The message is here"
+                print message.message
                 ##answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=message['message'], conversation_id=response['conversation_id'], client_id=response['client_id'])
                 ##print answer
             responses = answer['response']
