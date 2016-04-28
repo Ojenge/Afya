@@ -64,6 +64,7 @@ def receive_sms():
            # we have been having a conversation already
             dialogid = Messages.query.filter(Messages.number == from_number).first().dialogid
             search_text = Messages.query.filter(Messages.text == text)
+            print search_text
             if search_text:
                 print search_text
             else:
