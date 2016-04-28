@@ -66,6 +66,7 @@ def receive_sms():
             search_text = Messages.query.filter(Messages.text == text)
             if search_text:
                 print search_text
+            else:
                 # means it exists so we create it
                 message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
                 db.session.add(message)
@@ -74,7 +75,9 @@ def receive_sms():
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
             print response['client_id']
-            message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
+            #message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
+            messages = Messages.query.all()
+            print messages
             answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=text, conversation_id=response['conversation_id'], client_id=response['client_id'])
             print answer
             responses = answer['response']
