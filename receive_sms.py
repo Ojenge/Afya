@@ -11,8 +11,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 ##app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
 
 db = SQLAlchemy(app)
-db.create_all()
-db.session.commit()
 
 class Messages(db.Model):
     __tablename__ = 'messages'
@@ -84,9 +82,9 @@ def receive_sms():
             for message in messages:
                 print "The message is here"
                 print message.message
-                ##answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=message['message'], conversation_id=response['conversation_id'], client_id=response['client_id'])
-                ##print answer
-            ##responses = answer['response']
+                answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=message['message'], conversation_id=response['conversation_id'], client_id=response['client_id'])
+                print answer
+                responses = answer['response']
             ##if len(responses) > 1:
             ##    responses = filter(None, responses)
             ##    body = responses[0]
