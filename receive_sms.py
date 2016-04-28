@@ -69,7 +69,7 @@ def receive_sms():
                 print search_text
             else:
                 # means it exists so we create it
-                message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
+                message = Messages(message=text,dialogid=dialogid['dialog_id'],number=from_number)
                 db.session.add(message)
                 db.session.commit()
             print dialogid
