@@ -11,6 +11,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 ##app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
 
 db = SQLAlchemy(app)
+db.create_all()
+db.session.commit()
 
 class Messages(db.Model):
     __tablename__ = 'messages'
