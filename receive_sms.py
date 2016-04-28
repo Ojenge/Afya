@@ -63,7 +63,8 @@ def receive_sms():
            #we will need to filter the dialog id based on the number
            # we have been having a conversation already
             dialogid = Messages.query.filter(Messages.number == from_number).first().dialogid
-            search_text = Messages.query.filter(Messages.message == text)
+            print 'The text %s' %(text)
+            search_text = Messages.query.filter(Messages.message == text).count()
             print search_text
             if search_text:
                 print search_text
