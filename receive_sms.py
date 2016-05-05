@@ -82,7 +82,7 @@ def receive_sms():
             print classes
             if classes['top_class'] == 'SearchDisease':
                 #we google the text
-                res = client.query('What is tuberculosis?')
+                res = client.query(text)
                 for pod in res.pods:
                     if pod.title == 'Definition':
                         body = pod.text
