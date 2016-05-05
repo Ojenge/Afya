@@ -95,10 +95,11 @@ def receive_sms():
                     if (body is None) and (pod.title == 'Medical codes'):
                         print 'it should appear here'
                         payload = {'db':'healthTopics','term': pod.text}
+                        print payload
                         req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
                         tree = ElementTree.fromstring(req.content)
                         rank = tree.find( './/*[@rank="0"]' )
-                        content = rank[6].text
+                        #content = rank[6].text
                         #content = rank.find('.//*[@name="FullSummary"]')
                         #content = jinja2.filters.do_striptags(content.text)  
                         #body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
