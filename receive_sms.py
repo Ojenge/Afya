@@ -87,14 +87,16 @@ def receive_sms():
                 #we google the text
                 res = client.query(text)
                 body = None
+                primary_search = None
                 for pod in res.pods:
+                    primary_search = pod.text
                     if pod.title == 'Definition':
                         body = pod.text
                         print 'The wolf is here'
                         print body
                     if (body is None) and (pod.title == 'Medical codes'):
                         print 'it should appear here'
-                        payload = {'db':'healthTopics','term': pod.text}
+                        payload = {'db':'healthTopics','term': primary_search}
                         print payload
                         req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
                         tree = ElementTree.fromstring(req.content)
