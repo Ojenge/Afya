@@ -4,6 +4,7 @@ from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from watsonutils.dialog import DialogUtils
+from watsonutils.nlpclassifier import NLPUtils
 from watson_developer_cloud import WatsonException
 
 app = Flask(__name__)
@@ -50,6 +51,8 @@ def receive_sms():
     try:
         dialog = DialogUtils(app)
         dialogid = dialog.getDialogs()
+        nlp = NLPUtils(app)
+        classes = nlp.service.classify('3a84dfx64-nlc-2891', text)
         if not db.session.query(Messages).filter(Messages.number == from_number).count():
             dialogid = dialog.createDialog(dialog_file, from_number)
             message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
@@ -74,6 +77,7 @@ def receive_sms():
                 db.session.add(message)
                 db.session.commit()
             print dialogid
+            print classes
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
             print response['client_id']
