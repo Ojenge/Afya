@@ -1,8 +1,10 @@
 import plivo, plivoxml
 import os
 import wolframalpha
+import jinja2
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+from xml.etree import ElementTree
 
 from watsonutils.dialog import DialogUtils
 from watsonutils.nlpclassifier import NLPUtils
@@ -90,7 +92,14 @@ def receive_sms():
                         print 'The wolf is here'
                         print body
                     if (body is None) and (pod.title == 'Medical codes'):
-                        print 'it should appear here' 
+                        print 'it should appear here'
+                        payload = {'db':'healthTopics','term': pod.text}
+                        req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+                        tree = ElementTree.fromstring(req.content)
+                        rank = tree.find( './/*[@rank="0"]' )
+                        content = rank.find( './/*[@name="FullSummary"]' )
+                        content = jinja2.filters.do_striptags(content.text)  
+                        body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
     except WatsonException as err:
         print err 
 
