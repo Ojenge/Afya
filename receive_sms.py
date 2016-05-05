@@ -1,6 +1,7 @@
 import plivo, plivoxml
 import os
 import wolframalpha
+import requests
 import jinja2
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
