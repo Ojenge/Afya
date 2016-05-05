@@ -1,5 +1,6 @@
 import plivo, plivoxml
 import os
+import wolframalpha
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -12,6 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 ##app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
 
 db = SQLAlchemy(app)
+client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 
 class Messages(db.Model):
     __tablename__ = 'messages'
@@ -78,6 +80,15 @@ def receive_sms():
                 db.session.commit()
             print dialogid
             print classes
+            if classes['top_class'] == 'SearchDisease':
+                #we google the text
+                res = client.query('What is tuberculosis?')
+                for pod in res.pods:
+                    if pod.title == 'Definition':
+                        body = pod.text
+                        print 'The wolf is here'
+                        print body
+                 
             response = dialog.getConversation(dialogid)
             print response['conversation_id']
             print response['client_id']
@@ -91,9 +102,9 @@ def receive_sms():
                 responses = answer['response']
                 if len(responses) > 1:
                     responses = filter(None, responses)
-                    body = responses[0]
+                    #body = responses[0]
                 else:
-                    body = responses[0]
+                    #body = responses[0]
     except WatsonException as err:
         print err 
 
