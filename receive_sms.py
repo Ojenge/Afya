@@ -89,7 +89,7 @@ def receive_sms():
                         body = pod.text
                         print 'The wolf is here'
                         print body
-                     if (body is None) and (pod.title == 'Medical codes'):
+                    if (body is None) and (pod.title == 'Medical codes'):
                         print 'it should appear here' 
     except WatsonException as err:
         print err 
