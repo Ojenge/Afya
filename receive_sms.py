@@ -98,7 +98,8 @@ def receive_sms():
                         req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
                         tree = ElementTree.fromstring(req.content)
                         rank = tree.find( './/*[@rank="0"]' )
-                        content = rank.find( './/*[@name="FullSummary"]' )
+                        print rank
+                        content = rank.find('.//*[@name="FullSummary"]')
                         content = jinja2.filters.do_striptags(content.text)  
                         body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
     except WatsonException as err:
