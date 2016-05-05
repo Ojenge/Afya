@@ -88,23 +88,6 @@ def receive_sms():
                         body = pod.text
                         print 'The wolf is here'
                         print body
-                 
-            response = dialog.getConversation(dialogid)
-            print response['conversation_id']
-            print response['client_id']
-            #message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
-            messages = Messages.query.filter(Messages.number == from_number).all()
-            for message in messages:
-                print "The message is here"
-                print message.message
-                answer = dialog.service.conversation(dialog_id=dialogid,dialog_input=message.message, conversation_id=response['conversation_id'], client_id=response['client_id'])
-                print answer
-                responses = answer['response']
-                if len(responses) > 1:
-                    responses = filter(None, responses)
-                    #body = responses[0]
-                else:
-                    #body = responses[0]
     except WatsonException as err:
         print err 
 
