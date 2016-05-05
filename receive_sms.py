@@ -87,9 +87,8 @@ def receive_sms():
                 #we google the text
                 res = client.query(text)
                 body = None
-                primary_search = None
+                primary_search = res.pods[0].text
                 for pod in res.pods:
-                    primary_search = pod.text
                     if pod.title == 'Definition':
                         body = pod.text
                         print 'The wolf is here'
@@ -101,10 +100,9 @@ def receive_sms():
                         req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
                         tree = ElementTree.fromstring(req.content)
                         rank = tree.find( './/*[@rank="0"]' )
-                        #content = rank[6].text
-                        #content = rank.find('.//*[@name="FullSummary"]')
-                        #content = jinja2.filters.do_striptags(content.text)  
-                        #body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
+                        content = rank.find('.//*[@name="FullSummary"]')
+                        content = jinja2.filters.do_striptags(content.text)  
+                        body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
     except WatsonException as err:
         print err 
 
