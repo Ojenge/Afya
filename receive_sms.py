@@ -83,13 +83,13 @@ def receive_sms():
             if classes['top_class'] == 'SearchDisease':
                 #we google the text
                 res = client.query(text)
-                body = none
+                body = None
                 for pod in res.pods:
                     if pod.title == 'Definition':
                         body = pod.text
                         print 'The wolf is here'
                         print body
-                     if body is None and pod.title == 'Medical codes':
+                     if (body is None) and (pod.title == 'Medical codes'):
                         print 'it should appear here' 
     except WatsonException as err:
         print err 
