@@ -143,6 +143,8 @@ def receive_sms():
                     body = "You are welcome"
                 if text == "yes":
                     body = "You are welcome"
+                if (text == "No") or (text == "no"):
+                    body = "What else are you curious about"
                 print body
     except WatsonException as err:
         print err 
