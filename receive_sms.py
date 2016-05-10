@@ -118,7 +118,7 @@ def receive_sms():
                     sentence = re.findall(r"([^.]*?symptoms[^.]*\.)",content, re.IGNORECASE)
                     body = sentence[0]
             if classes['top_class'] == 'Treatment':
-                payload = {'db':'healthTopics','term': primary_search}
+                payload = {'db':'healthTopics','term': text}
                 print payload
                 req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
                 tree = ElementTree.fromstring(req.content)
@@ -143,6 +143,7 @@ def receive_sms():
                     body = "You are welcome"
                 if text == "yes":
                     body = "You are welcome"
+                print body
     except WatsonException as err:
         print err 
 
