@@ -58,7 +58,8 @@ def receive_sms():
         dialog = DialogUtils(app)
         dialogid = dialog.getDialogs()
         nlp = NLPUtils(app)
-        classes = nlp.service.classify('3a84dfx64-nlc-2891', text)
+        #classes = nlp.service.classify('3a84dfx64-nlc-2891', text)
+        classes = nlp.service.classify('3a84dfx64-nlc-5204', text)
         if not db.session.query(Messages).filter(Messages.number == from_number).count():
             dialogid = dialog.createDialog(dialog_file, from_number)
             message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
