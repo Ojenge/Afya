@@ -91,7 +91,7 @@ def receive_sms():
                 primary_search = res.pods[0].text
                 for pod in res.pods:
                     if pod.title == 'Definition':
-                        body = pod.text
+                        body = pod.text[7:]
                         print 'The wolf is here'
                         print body
                     if (body is None) and (pod.title == 'Medical codes'):
@@ -104,6 +104,44 @@ def receive_sms():
                         content = rank.find('.//*[@name="FullSummary"]')
                         content = jinja2.filters.do_striptags(content.text)  
                         body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
+            if classes['top_class'] == 'DiseaseSymptoms':
+                payload = {'db':'healthTopics','term': primary_search}
+                print payload
+                req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+                tree = ElementTree.fromstring(req.content)
+                rank = tree.find( './/*[@rank="0"]' )
+                content = rank.find('.//*[@name="FullSummary"]')
+                content = jinja2.filters.do_striptags(content.text)
+                symptom = re.search('symptoms',content, re.IGNORECASE)
+                if symptom:
+                    sentence = re.findall(r"([^.]*?symptoms[^.]*\.)",content, re.IGNORECASE)
+                    body = sentence[0]
+            if classes['top_class'] == 'Treatment':
+                payload = {'db':'healthTopics','term': primary_search}
+                print payload
+                req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+                tree = ElementTree.fromstring(req.content)
+                rank = tree.find( './/*[@rank="0"]' )
+                content = rank.find('.//*[@name="FullSummary"]')
+                content = jinja2.filters.do_striptags(content.text)
+                cure = re.search('cure',content, re.IGNORECASE)
+                treat = re.search('treat',content, re.IGNORECASE)
+                sentence = none
+                sentence_t = ""
+                if cure:
+                    sentence = re.findall(r"([^.]*?cure[^.]*\.)",content, re.IGNORECASE)
+                if treat:
+                    sentence_t = re.findall(r"([^.]*?treat[^.]*\.)",content, re.IGNORECASE)    
+                if sentence_t:
+                    body = sentence_t[0]
+                else:
+                    body = sentence[0]
+            if classes['top_class'] == 'Thanks':
+                body = "Will that be all? Anything else I could help with?"
+                if text == "Yes":
+                    body = "You are welcome"
+                if text == "yes":
+                    body = "You are welcome"
     except WatsonException as err:
         print err 
 
