@@ -138,7 +138,7 @@ def receive_sms():
                 else:
                     body = sentence[0]
             if classes['top_class'] == 'Finish':
-                body = "Will that be all? Anything else I could help with?"
+                body = "Will that be all?"
                 if text == "Yes":
                     body = "You are welcome"
                 if text == "yes":
