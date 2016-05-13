@@ -115,7 +115,7 @@ def receive_sms():
                 search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
                 if len(search) == 0 :
                     nouns.append("symptoms")
-                query text = ""
+                query_text = ""
                 for item in nouns:
                     query_text = query_text + item
                 print query_text
