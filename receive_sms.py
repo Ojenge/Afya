@@ -3,6 +3,7 @@ import os
 import re
 import wolframalpha
 import requests
+import nltk
 import jinja2
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -11,6 +12,7 @@ from xml.etree import ElementTree
 from watsonutils.dialog import DialogUtils
 from watsonutils.nlpclassifier import NLPUtils
 from watson_developer_cloud import WatsonException
+from nltk import word_tokenize, pos_tag
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -18,6 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 
 db = SQLAlchemy(app)
 client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
+
 
 class Messages(db.Model):
     __tablename__ = 'messages'
@@ -85,6 +88,7 @@ def receive_sms():
                 db.session.commit()
             print dialogid
             print classes
+            nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
             if classes['top_class'] == 'SearchDisease':
                 #we google the text
                 res = client.query(text)
@@ -106,7 +110,16 @@ def receive_sms():
                         content = jinja2.filters.do_striptags(content.text)  
                         body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
             if classes['top_class'] == 'DiseaseSymptoms':
-                payload = {'db':'healthTopics','term': primary_search}
+                print nouns
+                regex = re.compile(".*(symptoms).*",re.IGNORECASE)
+                search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
+                if len(search) == 0 :
+                    nouns.append("symptoms")
+                query text = ""
+                for item in nouns:
+                    query_text = query_text + item
+                print query_text
+                payload = {'db':'healthTopics','term': query_text}
                 print payload
                 req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
                 tree = ElementTree.fromstring(req.content)
