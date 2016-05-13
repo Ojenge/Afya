@@ -117,7 +117,7 @@ def receive_sms():
                     nouns.append("symptoms")
                 query_text = ""
                 for item in nouns:
-                    query_text = query_text + item
+                    query_text = query_text + " " + item
                 print query_text
                 print "now the payload"
                 payload = {'db':'healthTopics','term': query_text}
