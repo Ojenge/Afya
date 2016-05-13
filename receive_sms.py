@@ -119,6 +119,7 @@ def receive_sms():
                 for item in nouns:
                     query_text = query_text + item
                 print query_text
+                print "now the payload"
                 payload = {'db':'healthTopics','term': query_text}
                 print payload
                 req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
