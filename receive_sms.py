@@ -89,49 +89,51 @@ def receive_sms():
             print dialogid
             print classes
             nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
-            if classes['top_class'] == 'SearchDisease':
-                #we google the text
-                res = client.query(text)
-                body = None
-                try:
-                    primary_search = res.pods[0].text
-                    for pod in res.pods:
-                        if pod.title == 'Definition':
-                            body = pod.text[7:]
-                            print 'The wolf is here'
-                            print body
-                        if (body is None) and (pod.title == 'Medical codes'):
-                            print 'it should appear here'
-                            payload = {'db':'healthTopics','term': primary_search}
-                            print payload
-                            req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                            tree = ElementTree.fromstring(req.content)
-                            rank = tree.find( './/*[@rank="0"]' )
-                            content = rank.find('.//*[@name="FullSummary"]')
-                            content = jinja2.filters.do_striptags(content.text)  
-                            body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
-                 except:
-                    print nouns
-                    query_text = ""
-                    for item in nouns:
-                        query_text = query_text + " " + item
-                    print query_text
-                    if query_text is "":
-                        foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
-                        for item in foreign:
-                            query_text = query_text + " " + item 
-                    print "now the payload"
-                    payload = {'db':'healthTopics','term': query_text}
-                    print payload
-                    req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                    tree = ElementTree.fromstring(req.content)
-                    rank = tree.find( './/*[@rank="0"]' )
-                    content = rank.find('.//*[@name="FullSummary"]')
-                    content = jinja2.filters.do_striptags(content.text)
-                    lines = content.split('.')
-                    definition = lines[:2]
-                    for item in definition:
-                        body = body + item
+            confidence = classes['classes'][0]['confidence']
+            if confidence > 0.9: 
+                if classes['top_class'] == 'SearchDisease':
+                    #we google the text
+                    res = client.query(text)
+                    body = None
+                    try:
+                        primary_search = res.pods[0].text
+                        for pod in res.pods:
+                            if pod.title == 'Definition':
+                                body = pod.text[7:]
+                                print 'The wolf is here'
+                                print body
+                            if (body is None) and (pod.title == 'Medical codes'):
+                                print 'it should appear here'
+                                payload = {'db':'healthTopics','term': primary_search}
+                                print payload
+                                req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+                                tree = ElementTree.fromstring(req.content)
+                                rank = tree.find( './/*[@rank="0"]' )
+                                content = rank.find('.//*[@name="FullSummary"]')
+                                content = jinja2.filters.do_striptags(content.text)  
+                                body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
+                     except:
+                        print nouns
+                        query_text = ""
+                        for item in nouns:
+                            query_text = query_text + " " + item
+                        print query_text
+                        if query_text is "":
+                            foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
+                            for item in foreign:
+                                query_text = query_text + " " + item 
+                        print "now the payload"
+                        payload = {'db':'healthTopics','term': query_text}
+                        print payload
+                        req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+                        tree = ElementTree.fromstring(req.content)
+                        rank = tree.find( './/*[@rank="0"]' )
+                        content = rank.find('.//*[@name="FullSummary"]')
+                        content = jinja2.filters.do_striptags(content.text)
+                        lines = content.split('.')
+                        definition = lines[:2]
+                        for item in definition:
+                            body = body + item
             if classes['top_class'] == 'DiseaseSymptoms':
                 print nouns
                 regex = re.compile(".*(symptoms).*",re.IGNORECASE)
