@@ -166,7 +166,7 @@ def receive_sms():
                     content = jinja2.filters.do_striptags(content.text)
                     cure = re.search('cure',content, re.IGNORECASE)
                     treat = re.search('treat',content, re.IGNORECASE)
-                    sentence = none
+                    sentence = None
                     sentence_t = ""
                     if cure:
                         sentence = re.findall(r"([^.]*?cure[^.]*\.)",content, re.IGNORECASE)
