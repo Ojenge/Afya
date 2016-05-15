@@ -185,8 +185,8 @@ def receive_sms():
                     if (text == "No") or (text == "no"):
                         body = "What else are you curious about"
                     print body
-        else:
-            body = "Sorry I am not that intelligent. I did not get that."
+            else:
+                body = "Sorry I am not that intelligent. I did not get that."
     except WatsonException as err:
         print err 
 
