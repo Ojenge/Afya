@@ -112,7 +112,7 @@ def receive_sms():
                                 content = rank.find('.//*[@name="FullSummary"]')
                                 content = jinja2.filters.do_striptags(content.text)  
                                 body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
-                     except:
+                    except:
                         print nouns
                         query_text = ""
                         for item in nouns:
