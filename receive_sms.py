@@ -134,57 +134,59 @@ def receive_sms():
                         definition = lines[:2]
                         for item in definition:
                             body = body + item
-            if classes['top_class'] == 'DiseaseSymptoms':
-                print nouns
-                regex = re.compile(".*(symptoms).*",re.IGNORECASE)
-                search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
-                if len(search) == 0 :
-                    nouns.append("symptoms")
-                query_text = ""
-                for item in nouns:
-                    query_text = query_text + " " + item
-                print query_text
-                print "now the payload"
-                payload = {'db':'healthTopics','term': query_text}
-                print payload
-                req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                tree = ElementTree.fromstring(req.content)
-                rank = tree.find( './/*[@rank="0"]' )
-                content = rank.find('.//*[@name="FullSummary"]')
-                content = jinja2.filters.do_striptags(content.text)
-                symptom = re.search('symptoms',content, re.IGNORECASE)
-                if symptom:
-                    sentence = re.findall(r"([^.]*?symptoms[^.]*\.)",content, re.IGNORECASE)
-                    body = sentence[0]
-            if classes['top_class'] == 'Treatment':
-                payload = {'db':'healthTopics','term': text}
-                print payload
-                req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                tree = ElementTree.fromstring(req.content)
-                rank = tree.find( './/*[@rank="0"]' )
-                content = rank.find('.//*[@name="FullSummary"]')
-                content = jinja2.filters.do_striptags(content.text)
-                cure = re.search('cure',content, re.IGNORECASE)
-                treat = re.search('treat',content, re.IGNORECASE)
-                sentence = none
-                sentence_t = ""
-                if cure:
-                    sentence = re.findall(r"([^.]*?cure[^.]*\.)",content, re.IGNORECASE)
-                if treat:
-                    sentence_t = re.findall(r"([^.]*?treat[^.]*\.)",content, re.IGNORECASE)    
-                if sentence_t:
-                    body = sentence_t[0]
-                else:
-                    body = sentence[0]
-            if classes['top_class'] == 'Finish':
-                body = "Will that be all?"
-                if text == "Yes":
-                    body = "You are welcome"
-                if text == "yes":
-                    body = "You are welcome"
-                if (text == "No") or (text == "no"):
-                    body = "What else are you curious about"
-                print body
+                if classes['top_class'] == 'DiseaseSymptoms':
+                    print nouns
+                    regex = re.compile(".*(symptoms).*",re.IGNORECASE)
+                    search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
+                    if len(search) == 0 :
+                        nouns.append("symptoms")
+                    query_text = ""
+                    for item in nouns:
+                        query_text = query_text + " " + item
+                    print query_text
+                    print "now the payload"
+                    payload = {'db':'healthTopics','term': query_text}
+                    print payload
+                    req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+                    tree = ElementTree.fromstring(req.content)
+                    rank = tree.find( './/*[@rank="0"]' )
+                    content = rank.find('.//*[@name="FullSummary"]')
+                    content = jinja2.filters.do_striptags(content.text)
+                    symptom = re.search('symptoms',content, re.IGNORECASE)
+                    if symptom:
+                        sentence = re.findall(r"([^.]*?symptoms[^.]*\.)",content, re.IGNORECASE)
+                        body = sentence[0]
+                if classes['top_class'] == 'Treatment':
+                    payload = {'db':'healthTopics','term': text}
+                    print payload
+                    req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+                    tree = ElementTree.fromstring(req.content)
+                    rank = tree.find( './/*[@rank="0"]' )
+                    content = rank.find('.//*[@name="FullSummary"]')
+                    content = jinja2.filters.do_striptags(content.text)
+                    cure = re.search('cure',content, re.IGNORECASE)
+                    treat = re.search('treat',content, re.IGNORECASE)
+                    sentence = none
+                    sentence_t = ""
+                    if cure:
+                        sentence = re.findall(r"([^.]*?cure[^.]*\.)",content, re.IGNORECASE)
+                    if treat:
+                        sentence_t = re.findall(r"([^.]*?treat[^.]*\.)",content, re.IGNORECASE)    
+                    if sentence_t:
+                        body = sentence_t[0]
+                    else:
+                        body = sentence[0]
+                if classes['top_class'] == 'Finish':
+                    body = "Will that be all?"
+                    if text == "Yes":
+                        body = "You are welcome"
+                    if text == "yes":
+                        body = "You are welcome"
+                    if (text == "No") or (text == "no"):
+                        body = "What else are you curious about"
+                    print body
+        else:
+            body = "Sorry I am not that intelligent. I did not get that."
     except WatsonException as err:
         print err 
 
