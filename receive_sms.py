@@ -195,26 +195,30 @@ def receive_sms():
             else:
                 body = "Sorry I am not that intelligent. I did not get that."
     except WatsonException as err:
-        print err 
+        print err
+    if source == "Kenya":
+        ret_response = "Kenya sms"
+    else:
+ 
 
-    resp = plivoxml.Response()
+        resp = plivoxml.Response()
 
-    params = {
-    'src' : to_number, # Sender's phone number
-    'dst' : from_number, # Receiver's phone Number
-    'callbackUrl': "http://afya.herokuapp.com/report/", # URL that is notified by Plivo when a response is available and to which the response is sent
-    'callbackMethod' : "GET" # The method used to notify the callbackUrl
-    }
+        params = {
+        'src' : to_number, # Sender's phone number
+        'dst' : from_number, # Receiver's phone Number
+        'callbackUrl': "http://afya.herokuapp.com/report/", # URL that is notified by Plivo when a response is available and to which the response is sent
+        'callbackMethod' : "GET" # The method used to notify the callbackUrl
+        }
 
-    # Message added
-    resp.addMessage(body, **params)
+        # Message added
+        resp.addMessage(body, **params)
 
-    ret_response = make_response(resp.to_xml())
-    ret_response.headers["Content-type"] = "text/xml"
+        ret_response = make_response(resp.to_xml())
+        ret_response.headers["Content-type"] = "text/xml"
 
-    # Prints the XML
-    print resp.to_xml()
-    # Returns the XML
+        # Prints the XML
+        print resp.to_xml()
+        # Returns the XML
     return ret_response
 
 @app.route("/report/", methods=['GET','POST'])
