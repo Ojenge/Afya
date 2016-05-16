@@ -203,7 +203,13 @@ def receive_sms():
         print json.dumps(payload)
         frontline_resp = requests.post("https://cloud.frontlinesms.com/api/1/webhook",data=json.dumps(payload))
         print frontline_resp.content
-        ret_response = "Kenya sms"
+        response = { "payload": { "success": "true", "task": "send",
+        "messages": [
+            {
+                "to": from_number,
+                "message": body,
+            }]}}
+        ret_response = json.dumps(response)
     else:
  
 
