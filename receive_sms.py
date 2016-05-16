@@ -54,7 +54,7 @@ def receive_sms():
 
     # The text which was received
     source = request.values.get('source')
-   
+    source = "Kenya" 
     afyasecret = request.values.get('afyasecret')
     print afyasecret
     device = request.values.get('Device')
