@@ -5,6 +5,7 @@ import wolframalpha
 import requests
 import nltk
 import jinja2
+import json
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 from xml.etree import ElementTree
@@ -198,7 +199,9 @@ def receive_sms():
         print err
     if source == "Kenya":
         payload = {"apiKey":"90303b65-2240-4316-9898-6493af7364e1", "payload":{"message": body, "recipients":[{ "type":"mobile", "value": from_number }]}}
-        frontline_resp = requests.post("https://cloud.frontlinesms.com/api/1/webhook",data=payload)
+        print payload
+        print json.dumps(payload)
+        frontline_resp = requests.post("https://cloud.frontlinesms.com/api/1/webhook",data=json.dumps(payload))
         print frontline_resp.content
         ret_response = "Kenya sms"
     else:
