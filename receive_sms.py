@@ -50,6 +50,9 @@ def receive_sms():
 
     # The text which was received
     text = request.values.get('Text')
+
+    # The text which was received
+    source = request.values.get('source')
     
     # Print the message
     print 'Text received: %s - From: %s' % (text, from_number)
