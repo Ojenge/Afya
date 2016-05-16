@@ -233,6 +233,11 @@ def report():
     print "From : %s To : %s Status : %s MessageUUID : %s" % (from_number, to_number, status,uuid)
     return "Delivery reported"
 
+@app.route('/')
+def kenyan_numbers():
+    print request.values.get('task')
+    return 'Hello World!'
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port,debug=True)
