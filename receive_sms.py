@@ -197,8 +197,8 @@ def receive_sms():
     except WatsonException as err:
         print err
     if source == "Kenya":
-        payload = {"apiKey":"07e6bea5-5974-41dd-adc6-e3112908953a", "payload":{"message": body, "recipients":[{ "type":"mobile", "value": from_number }]}}
-        frontline_resp = requests.post("https://cloud.frontlinesms.com/api/1/webhook",params=payload)
+        payload = {"apiKey":"90303b65-2240-4316-9898-6493af7364e1", "payload":{"message": body, "recipients":[{ "type":"mobile", "value": from_number }]}}
+        frontline_resp = requests.post("https://cloud.frontlinesms.com/api/1/webhook",data=payload)
         print frontline_resp.content
         ret_response = "Kenya sms"
     else:
