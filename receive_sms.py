@@ -56,7 +56,9 @@ def receive_sms():
     source = request.values.get('source')
    
     afyasecret = request.values.get('afyasecret')
-    print "Device is %s" % afyasecret
+    print afyasecret
+    device = request.values.get('Device')
+    print device
     print request.values
  
     # Print the message
