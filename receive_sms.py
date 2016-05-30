@@ -208,7 +208,7 @@ def receive_sms():
                     print body
             else:
                 body = "Sorry I could not find anything on that. Could you ask another question?"
-            message = Message.query.get(message.id)
+            message = Messages.query.get(message.id)
             message.response = body
             db.session.commit()
     except WatsonException as err:
