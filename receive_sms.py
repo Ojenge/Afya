@@ -92,13 +92,13 @@ def receive_sms():
             print 'The text %s' %(text)
             search_text = Messages.query.filter(Messages.message == text).count()
             print search_text
-            if search_text:
-                print search_text
-            else:
+            #if search_text:
+            #    print search_text
+            #else:
                 # means it exists so we create it
-                message = Messages(message=text,dialogid=dialogid,number=from_number)
-                db.session.add(message)
-                db.session.commit()
+            message = Messages(message=text,dialogid=dialogid,number=from_number)
+            db.session.add(message)
+            db.session.commit()
             print dialogid
             print classes
             nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
