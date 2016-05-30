@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import plivo, plivoxml
 import os
 import re
@@ -200,7 +203,7 @@ def receive_sms():
                         body = "What else are you curious about"
                     print body
             else:
-                body = u'Sorry I couldn’t find anything on that. Could you ask another question?'
+                body = "Sorry I could not find anything on that. Could you ask another question?"
     except WatsonException as err:
         print err
     if device == "Afyadevice":
