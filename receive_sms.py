@@ -203,7 +203,7 @@ def receive_sms():
                 body = "Sorry I am not that intelligent. I did not get that."
     except WatsonException as err:
         print err
-    if source == "Kenya":
+    if device == "Afyadevice":
         payload = {"apiKey":"90303b65-2240-4316-9898-6493af7364e1", "payload":{"message": body, "recipients":[{ "type":"mobile", "value": from_number }]}}
         print payload
         print json.dumps(payload)
