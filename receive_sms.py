@@ -31,6 +31,7 @@ class Messages(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String())
+    response = db.Column(db.String())
     dialogid = db.Column(db.String())
     number = db.Column(db.String(120))
 
