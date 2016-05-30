@@ -37,9 +37,10 @@ class Messages(db.Model):
     timestamp = db.Column(db.DateTime)
     number = db.Column(db.String(120))
 
-    def __init__(self, message, dialogid, number):
+    def __init__(self, message, dialogid, timestamp):
         self.dialogid= dialogid
         self.message = message
+        self.timestamp = timestamp
         self.number = number
 
     def __repr__(self):
@@ -81,7 +82,7 @@ def receive_sms():
         classes = nlp.service.classify('3a84dfx64-nlc-5204', text)
         if not db.session.query(Messages).filter(Messages.number == from_number).count():
             dialogid = dialog.createDialog(dialog_file, from_number)
-            message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number)
+            message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number,timestamp=datetime.datetime.utcnow())
             db.session.add(message)
             db.session.commit()
             dialogid = dialogid['dialog_id']
