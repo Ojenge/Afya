@@ -99,7 +99,9 @@ def receive_sms():
                 # means it exists so we create it
             message = Messages(message=text,dialogid=dialogid,number=from_number)
             db.session.add(message)
-            db.session.commit()
+            message_id = db.session.commit()
+            print "message commit"
+            print message_id
             print dialogid
             print classes
             nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
