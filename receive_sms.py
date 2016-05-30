@@ -201,6 +201,7 @@ def receive_sms():
                     print body
             else:
                 body = "Sorry I couldn’t find anything on that. Could you ask another question?"
+                body = unicode(body)
     except WatsonException as err:
         print err
     if device == "Afyadevice":
