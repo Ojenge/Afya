@@ -147,6 +147,7 @@ def receive_sms():
                         definition = lines[:2]
                         for item in definition:
                             body = body + item
+                    print body
                 if classes['top_class'] == 'DiseaseSymptoms':
                     print nouns
                     regex = re.compile(".*(symptoms).*",re.IGNORECASE)
