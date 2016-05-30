@@ -37,7 +37,7 @@ class Messages(db.Model):
     timestamp = db.Column(db.DateTime)
     number = db.Column(db.String(120))
 
-    def __init__(self, message, dialogid, timestamp):
+    def __init__(self, message, dialogid, number, timestamp):
         self.dialogid= dialogid
         self.message = message
         self.timestamp = timestamp
