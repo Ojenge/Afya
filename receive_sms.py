@@ -9,6 +9,7 @@ import requests
 import nltk
 import jinja2
 import json
+import datetime
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 from xml.etree import ElementTree
@@ -33,6 +34,7 @@ class Messages(db.Model):
     message = db.Column(db.String())
     response = db.Column(db.String())
     dialogid = db.Column(db.String())
+    timestamp = db.Column(db.DateTime)
     number = db.Column(db.String(120))
 
     def __init__(self, message, dialogid, number):
@@ -97,7 +99,7 @@ def receive_sms():
             #    print search_text
             #else:
                 # means it exists so we create it
-            message = Messages(message=text,dialogid=dialogid,number=from_number)
+            message = Messages(message=text,dialogid=dialogid,number=from_number, timestamp=datetime.datetime.utcnow())
             db.session.add(message)
             message_id = db.session.commit()
             print "message commit"
