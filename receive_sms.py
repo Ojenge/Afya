@@ -26,25 +26,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
 client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 
-
-class Messages(db.Model):
-    __tablename__ = 'messages'
-
-    id = db.Column(db.Integer, primary_key=True)
-    message = db.Column(db.String())
-    response = db.Column(db.String())
-    dialogid = db.Column(db.String())
-    timestamp = db.Column(db.DateTime)
-    number = db.Column(db.String(120))
-
-    def __init__(self, message, dialogid, number, timestamp):
-        self.dialogid= dialogid
-        self.message = message
-        self.timestamp = timestamp
-        self.number = number
-
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
+from models import Messages
 
 
 @app.route("/receive_sms/", methods=['GET','POST'])
