@@ -1,4 +1,4 @@
-from receive_sms import app, db
+from app import db
 from sqlalchemy.dialects.postgresql import JSON
 
 

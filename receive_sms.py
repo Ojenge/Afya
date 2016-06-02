@@ -21,13 +21,13 @@ from nltk import word_tokenize, pos_tag
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 ##app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://waguhplidoqlao:gkOntEWO-1nOeWawrA0sqiVu9r@ec2-54-163-225-208.compute-1.amazonaws.com:5432/d2c1f8q9j9i8dr'
 
 db = SQLAlchemy(app)
 client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 
-from models import Messages
-
+from models import *
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
