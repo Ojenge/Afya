@@ -30,7 +30,7 @@ client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 from models import *
 
 def get_profile(number):
-   number = User.query.filter_by(number=number).first()
+   number = User.query.filter_by(phone_number=number).first()
    return user
 
 def send_message(type,from_number,body):
