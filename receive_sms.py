@@ -29,6 +29,37 @@ client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 
 from models import *
 
+def get_profile(number):
+   number = User.query.filter_by(number=number).first()
+   return user
+
+def send_message(type,from_number,body):
+    if type == "Afyadevice":
+        response = { "payload": { "success": "true", "task": "send",
+        "messages": [
+            {
+                "to": from_number,
+                "message": body,
+            }]}}
+        ret_response = json.dumps(response)
+    
+    else:
+        resp = plivoxml.Response()
+        params = {
+        'src' : to_number, # Sender's phone number
+        'dst' : from_number, # Receiver's phone Number
+        'callbackUrl': "http://afya.herokuapp.com/report/", # URL that is notified by Plivo when a response is available and to which the response is sent
+        'callbackMethod' : "GET" # The method used to notify the callbackUrl
+        }
+        # Message added
+        resp.addMessage(body, **params)
+        ret_response = make_response(resp.to_xml())
+        ret_response.headers["Content-type"] = "text/xml"
+        # Prints the XML
+        print resp.to_xml()
+        # Returns the XML
+    return ret_response 
+
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
 
@@ -53,6 +84,18 @@ def receive_sms():
     # Print the message
     print 'Text received: %s - From: %s' % (text, from_number)
     #return "Text received"
+    #if get_profile(from_number):
+    #    user = get_profile(number)
+    #else:
+    #    user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow())
+    #    db.session.add(user)
+    #    db.session.commit()
+    #if user:
+    #    if not user.username:
+    #        body = "Welcome to Afya, and what shall we call you?"
+     #       send_message(device,from_number,body)
+        #we will need to add a standard message to keep users engaged here
+
     # Generate a Message XML with the details of the reply to be sent.
     dialog_file = open("resources/pizza_sample.xml", 'r')
     body = 'Thank you for your message'
@@ -198,40 +241,7 @@ def receive_sms():
             db.session.commit()
     except WatsonException as err:
         print err
-    if device == "Afyadevice":
-        payload = {"apiKey":"90303b65-2240-4316-9898-6493af7364e1", "payload":{"message": body, "recipients":[{ "type":"mobile", "value": from_number }]}}
-        print payload
-        print json.dumps(payload)
-        frontline_resp = requests.post("https://cloud.frontlinesms.com/api/1/webhook",data=json.dumps(payload))
-        print frontline_resp.content
-        response = { "payload": { "success": "true", "task": "send",
-        "messages": [
-            {
-                "to": from_number,
-                "message": body,
-            }]}}
-        ret_response = json.dumps(response)
-    else:
- 
-
-        resp = plivoxml.Response()
-
-        params = {
-        'src' : to_number, # Sender's phone number
-        'dst' : from_number, # Receiver's phone Number
-        'callbackUrl': "http://afya.herokuapp.com/report/", # URL that is notified by Plivo when a response is available and to which the response is sent
-        'callbackMethod' : "GET" # The method used to notify the callbackUrl
-        }
-
-        # Message added
-        resp.addMessage(body, **params)
-
-        ret_response = make_response(resp.to_xml())
-        ret_response.headers["Content-type"] = "text/xml"
-
-        # Prints the XML
-        print resp.to_xml()
-        # Returns the XML
+    ret_response = send_message(device,from_number,body)
     return ret_response
 
 @app.route("/report/", methods=['GET','POST'])
