@@ -83,17 +83,24 @@ def receive_sms():
  
     # Print the message
     print 'Text received: %s - From: %s' % (text, from_number)
+    dialog = DialogUtils(app)
+    dialogid = dialog.getDialogs()
     #return "Text received"
-    #if get_profile(from_number):
-    #    user = get_profile(number)
-    #else:
-    #    user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow())
-    #    db.session.add(user)
-    #    db.session.commit()
-    #if user:
-    #    if not user.username:
-    #        body = "Welcome to Afya, and what shall we call you?"
-     #       send_message(device,from_number,body)
+    if get_profile(from_number):
+        user = get_profile(number)
+    else:
+        user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow())
+        db.session.add(user)
+        db.session.commit()
+    if user:
+        if not user.username:
+            body = "Welcome to Afya, and what shall we call you?"
+            send_message(device,from_number,body)
+            #we then save the message
+            message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
+            db.session.add(message)
+            db.session.commit()
+            print 'successful request to update profile'
         #we will need to add a standard message to keep users engaged here
 
     # Generate a Message XML with the details of the reply to be sent.

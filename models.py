@@ -10,8 +10,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(120), unique=True)
     phone_number = db.Column(db.String(120), unique=True)
-    messages = db.relationship('Messages', backref='user',
-                                lazy='dynamic')
+    messages = db.relationship('Messages', backref='user', lazy='dynamic')
 
     def __init__(self, username, email):
         self.username = username
