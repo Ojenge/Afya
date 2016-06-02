@@ -29,7 +29,7 @@ class Messages(db.Model):
     dialogid = db.Column(db.String())
     timestamp = db.Column(db.DateTime)
     number = db.Column(db.String(120))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __init__(self, message, dialogid, number, timestamp):
         self.dialogid= dialogid
