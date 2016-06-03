@@ -87,7 +87,7 @@ def receive_sms():
     dialogid = dialog.getDialogs()
     #return "Text received"
     if get_profile(from_number):
-        user = get_profile(number)
+        user = get_profile(from_number)
     else:
         user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow())
         db.session.add(user)
