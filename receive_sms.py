@@ -65,7 +65,9 @@ def check_last_thread(number):
         message = Messages.query.filter_by(number=number).order_by(Messages.id.desc()).first()
         status = True
         if message.response == "Welcome to Afya, and what shall we call you?":
-            status = 'onboard'
+            status = 'ask_name'
+        else:
+            status = 'welcome'
     else:
         print 'no messages registered yet'
         status = False
@@ -88,6 +90,9 @@ def receive_sms():
     dialog = DialogUtils(app)
     #return "Text received"
     ret_response = 'Test'
+    #we first get the last message
+    status = check_last_thread(from_number)
+    print status 
     if get_profile(from_number):
         user = get_profile(from_number)
     else:
@@ -105,8 +110,7 @@ def receive_sms():
         db.session.add(message)
         db.session.commit()
         ret_response = send_message(device,from_number,to_number, body)
-    status = check_last_thread(from_number)
-    if status != 'onboard':
+    if status == 'ask_name':
         user.username = text
         db.session.commit()
         body = "Okay,%s ask any question such as What is malaria" % (text) 
