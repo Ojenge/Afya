@@ -102,7 +102,7 @@ def receive_sms():
         message = Messages(text,dialogid=dialog.dialogid,number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
         db.session.add(message)
         db.session.commit()
-    status = check_last_thread()
+    status = check_last_thread(from_number)
     if status == 'onboard':
         user.username = text
         db.session.commit()
