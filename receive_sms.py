@@ -87,7 +87,7 @@ def receive_sms():
     dialog_file = open("resources/pizza_sample.xml", 'r')
     dialog = DialogUtils(app)
     #return "Text received"
-    body = "Hey I am Afyabot, your personnal health assistant"
+    ret_response = 'Test'
     if get_profile(from_number):
         user = get_profile(from_number)
     else:
@@ -103,12 +103,13 @@ def receive_sms():
         message = Messages(text,dialogid=dialog.dialogid,number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
         db.session.add(message)
         db.session.commit()
+        ret_response = send_message(device,from_number,to_number, body)
     status = check_last_thread(from_number)
     if status == 'onboard':
         user.username = text
         db.session.commit()
         body = "Okay,%s ask any question such as What is malaria" % (text) 
-    ret_response = send_message(device,from_number,to_number, body)
+        ret_response = send_message(device,from_number,to_number, body)
     return ret_response
 
 @app.route("/report/", methods=['GET','POST'])
