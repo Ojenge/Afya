@@ -13,9 +13,9 @@ class User(db.Model):
     timestamp = db.Column(db.DateTime)
     messages = db.relationship('Messages', backref='user', lazy='dynamic')
 
-    def __init__(self, username, email, phone_number,timestamp):
-        self.username = username
-        self.email = email
+    def __init__(self, phone_number,timestamp):
+        #self.username = username
+        #self.email = email
         self.phone_number = phone_number
         self.timestamp = timestamp
 
