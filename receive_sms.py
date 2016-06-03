@@ -62,27 +62,18 @@ def send_message(type,from_number,to_number,body):
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
-
     # Sender's phone numer
     from_number = request.values.get('From')
-
     # Receiver's phone number - Plivo number
     to_number = request.values.get('To')
-
     # The text which was received
     text = request.values.get('Text')
-
-    # The text which was received
-    source = request.values.get('source')
-    source = "Kenya" 
-    afyasecret = request.values.get('afyasecret')
-    print afyasecret
     device = request.values.get('Device')
-    print device
-    print request.values
  
     # Print the message
     print 'Text received: %s - From: %s' % (text, from_number)
+    # Generate a Message XML with the details of the reply to be sent.
+    dialog_file = open("resources/pizza_sample.xml", 'r')
     dialog = DialogUtils(app)
     dialogid = dialog.getDialogs()
     #return "Text received"
@@ -96,6 +87,7 @@ def receive_sms():
         if not user.username:
             body = "Welcome to Afya, and what shall we call you?"
             send_message(device,from_number,to_number,body)
+            dialogid = dialog.createDialog(dialog_file, from_number)
             #we then save the message
             message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
             db.session.add(message)
@@ -103,8 +95,6 @@ def receive_sms():
             print 'successful request to update profile'
         #we will need to add a standard message to keep users engaged here
 
-    # Generate a Message XML with the details of the reply to be sent.
-    dialog_file = open("resources/pizza_sample.xml", 'r')
     body = 'Thank you for your message'
     try:
         dialog = DialogUtils(app)
