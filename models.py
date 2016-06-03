@@ -35,9 +35,6 @@ class User(db.Model):
         self.phone_number = phone_number
         self.timestamp = timestamp
 
-    def __repr__(self):
-        return '<User %r>' % self.username
-
 class Messages(db.Model):
     __tablename__ = 'messages'
 
