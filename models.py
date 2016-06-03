@@ -10,10 +10,10 @@ class Dialog(db.Model):
     dialogid = db.Column(db.String(120), unique=True)
     timestamp = db.Column(db.DateTime)
 
-    def __init__(self, name,dialogid):
+    def __init__(self, name, dialogid, timestamp):
         self.dialogid = dialogid
         self.name = name
-        #self.timestamp = timestamp
+        self.timestamp = timestamp
 
     def __repr__(self):
         return '<Dialog %r>' % self.name
