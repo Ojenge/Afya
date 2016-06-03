@@ -96,7 +96,7 @@ def receive_sms():
         db.session.commit()
         dialogid = dialog.createDialog(dialog_file, from_number)
         print dialogid
-        dialog = Dialog(name=from_number,dialogid=dialogid['dialog_id'],timestamp=datetime.datetime.utcnow())
+        dialog = Dialog(name=from_number,dialogid=dialogid['dialog_id'])
         db.session.add(dialog)
         db.session.commit()
         body = "Welcome to Afya, and what shall we call you?"
