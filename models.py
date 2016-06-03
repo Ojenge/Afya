@@ -1,5 +1,6 @@
 from receive_sms import db
 #from app import db
+import datetime
 from sqlalchemy.dialects.postgresql import JSON
 
 class Dialog(db.Model):
@@ -10,10 +11,10 @@ class Dialog(db.Model):
     dialogid = db.Column(db.String(120), unique=True)
     timestamp = db.Column(db.DateTime)
 
-    def __init__(self, name, dialogid, timestamp):
+    def __init__(self, name, dialogid):
         self.dialogid = dialogid
         self.name = name
-        self.timestamp = timestamp
+        self.timestamp = datetime.datetime.utcnow()
 
     def __repr__(self):
         return '<Dialog %r>' % self.name
@@ -48,11 +49,8 @@ class Messages(db.Model):
     number = db.Column(db.String(120))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    def __init__(self, message, dialogid, number, timestamp):
-        self.dialogid= dialogid
-        self.message = message
-        self.timestamp = timestamp
-        self.number = number
+    def __init__(self, message, dialogid, number, **kwargs):
+        db.Model.__init__(self, message, dialogid, number, **kwargs)
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
