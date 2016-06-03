@@ -94,6 +94,7 @@ def receive_sms():
         user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow())
         db.session.add(user)
         db.session.commit()
+        user = User.query.filter_by(phone_number=from_number).first()
         dialogid = dialog.createDialog(dialog_file, from_number)
         print dialogid
         dialog = Dialog(name=from_number,dialogid=dialogid['dialog_id'])
