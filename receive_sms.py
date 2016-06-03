@@ -58,7 +58,18 @@ def send_message(type,from_number,to_number,body):
         # Prints the XML
         print resp.to_xml()
         # Returns the XML
-    return ret_response 
+    return ret_response
+
+def check_last_thread(number):
+    if Messages.query.filter_by(number=number).order_by(Messages.id.desc()).first():
+        message = Messages.query.filter_by(number=number).order_by(Messages.id.desc()).first()
+        status = True
+        if message.response == "Welcome to Afya, and what shall we call you?":
+            status = 'onboard'
+    else:
+        print 'no messages registered yet'
+        status = False
+    return status
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
@@ -75,7 +86,6 @@ def receive_sms():
     # Generate a Message XML with the details of the reply to be sent.
     dialog_file = open("resources/pizza_sample.xml", 'r')
     dialog = DialogUtils(app)
-    dialogid = dialog.getDialogs()
     #return "Text received"
     if get_profile(from_number):
         user = get_profile(from_number)
@@ -83,162 +93,21 @@ def receive_sms():
         user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow())
         db.session.add(user)
         db.session.commit()
-    if user:
-        if not user.username:
-            body = "Welcome to Afya, and what shall we call you?"
-            send_message(device,from_number,to_number,body)
-            dialogid = dialog.createDialog(dialog_file, from_number)
-            #we then save the message
-            message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
-            db.session.add(message)
-            db.session.commit()
-            print 'successful request to update profile'
-        #we will need to add a standard message to keep users engaged here
-
-    body = 'Thank you for your message'
-    try:
-        dialog = DialogUtils(app)
-        dialogid = dialog.getDialogs()
-        nlp = NLPUtils(app)
-        #classes = nlp.service.classify('3a84dfx64-nlc-2891', text)
-        classes = nlp.service.classify('3a84dfx64-nlc-5204', text)
-        if not db.session.query(Messages).filter(Messages.number == from_number).count():
-            dialogid = dialog.createDialog(dialog_file, from_number)
-            message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number,timestamp=datetime.datetime.utcnow())
-            db.session.add(message)
-            db.session.commit()
-            dialogid = dialogid['dialog_id']
-            response = dialog.getConversation(dialogid)
-            print response['conversation_id']
-            body = response['response'][0]
-        else:
-           #we will need to filter the dialog id based on the number
-           # we have been having a conversation already
-            dialogid = Messages.query.filter(Messages.number == from_number).first().dialogid
-            print 'The text %s' %(text)
-            search_text = Messages.query.filter(Messages.message == text).count()
-            print search_text
-            #if search_text:
-            #    print search_text
-            #else:
-                # means it exists so we create it
-            message = Messages(message=text,dialogid=dialogid,number=from_number, timestamp=datetime.datetime.utcnow())
-            db.session.add(message)
-            message_id = db.session.commit()
-            print "message commit"
-            print message.id
-            print dialogid
-            print classes
-            nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
-            confidence = classes['classes'][0]['confidence']
-            if confidence > 0.9: 
-                if classes['top_class'] == 'SearchDisease':
-                    #we google the text
-                    res = client.query(text)
-                    body = None
-                    try:
-                        primary_search = res.pods[0].text
-                        for pod in res.pods:
-                            if pod.title == 'Definition':
-                                body = pod.text[7:]
-                                print 'The wolf is here'
-                                print body
-                            if (body is None) and (pod.title == 'Medical codes'):
-                                print 'it should appear here'
-                                payload = {'db':'healthTopics','term': primary_search}
-                                print payload
-                                req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                                tree = ElementTree.fromstring(req.content)
-                                rank = tree.find( './/*[@rank="0"]' )
-                                content = rank.find('.//*[@name="FullSummary"]')
-                                content = jinja2.filters.do_striptags(content.text)  
-                                body = re.match(r'(?:[^.:;]+[.:;]){4}', content).group()
-                    except:
-                        print nouns
-                        query_text = ""
-                        for item in nouns:
-                            query_text = query_text + " " + item
-                        print query_text
-                        if query_text is "":
-                            foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
-                            for item in foreign:
-                                query_text = query_text + " " + item 
-                        print "now the payload"
-                        payload = {'db':'healthTopics','term': query_text}
-                        print payload
-                        req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                        tree = ElementTree.fromstring(req.content)
-                        rank = tree.find( './/*[@rank="0"]' )
-                        content = rank.find('.//*[@name="FullSummary"]')
-                        content = jinja2.filters.do_striptags(content.text)
-                        lines = content.split('.')
-                        definition = lines[:2]
-                        for item in definition:
-                            body = body + item
-                    print body
-                if classes['top_class'] == 'DiseaseSymptoms':
-                    print nouns
-                    regex = re.compile(".*(symptoms).*",re.IGNORECASE)
-                    search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
-                    if len(search) == 0 :
-                        nouns.append("symptoms")
-                    query_text = ""
-                    for item in nouns:
-                        query_text = query_text + " " + item
-                    print query_text
-                    print "now the payload"
-                    payload = {'db':'healthTopics','term': query_text}
-                    print payload
-                    req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                    tree = ElementTree.fromstring(req.content)
-                    rank = tree.find( './/*[@rank="0"]' )
-                    content = rank.find('.//*[@name="FullSummary"]')
-                    content = jinja2.filters.do_striptags(content.text)
-                    symptom = re.search('symptoms',content, re.IGNORECASE)
-                    if symptom:
-                        sentence = re.findall(r"([^.]*?symptoms[^.]*\.)",content, re.IGNORECASE)
-                        body = sentence[0]
-                if classes['top_class'] == 'Treatment':
-                    print nouns
-                    regex = re.compile(".*(treat).*",re.IGNORECASE)
-                    search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
-                    if len(search) == 0 :
-                        nouns.append("treat")
-                    query_text = ""
-                    for item in nouns:
-                        query_text = query_text + " " + item
-                    print query_text
-                    print "now the payload"
-                    payload = {'db':'healthTopics','term': query_text}
-                    print payload
-                    req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
-                    tree = ElementTree.fromstring(req.content)
-                    rank = tree.find( './/*[@rank="0"]' )
-                    content = rank.find('.//*[@name="FullSummary"]')
-                    content = jinja2.filters.do_striptags(content.text)
-                    treat = re.search('treat',content, re.IGNORECASE)
-                    if treat:
-                        sentence = re.findall(r"([^.]*?treat[^.]*\.)",content, re.IGNORECASE)
-                    else:
-                        sentence = re.findall(r"([^.]*?cure[^.]*\.)",content, re.IGNORECASE)
-                    body = sentence[0]
-                if classes['top_class'] == 'Finish':
-                    body = "Will that be all?"
-                    if text == "Yes":
-                        body = "You are welcome"
-                    if text == "yes":
-                        body = "You are welcome"
-                    if (text == "No") or (text == "no"):
-                        body = "What else are you curious about"
-                    print body
-            else:
-                body = "Sorry I could not find anything on that. Could you ask another question?"
-            message = Messages.query.get(message.id)
-            message.response = body
-            db.session.commit()
-    except WatsonException as err:
-        print err
-    ret_response = send_message(device,from_number,body)
+        dialogid = dialog.createDialog(dialog_file, from_number)
+        print dialogid
+        dialog = Dialog(name=from_number,dialogid=dialogid['dialog_id'],timestamp=datetime.datetime.utcnow())
+        db.session.add(dialog)
+        db.session.commit()
+        body = "Welcome to Afya, and what shall we call you?"
+        message = Messages(text,dialogid=dialog.dialogid,number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
+        db.session.add(message)
+        db.session.commit()
+    status = check_last_thread()
+    if status == 'onboard':
+        user.username = text
+        db.session.commit()
+        body = "Okay,%s ask any question such as What is malaria" % (text) 
+    ret_response = send_message(device,from_number,to_number, body)
     return ret_response
 
 @app.route("/report/", methods=['GET','POST'])

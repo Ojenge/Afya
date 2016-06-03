@@ -2,6 +2,21 @@ from receive_sms import db
 #from app import db
 from sqlalchemy.dialects.postgresql import JSON
 
+class Dialog(db.Model):
+    __tablename__ = 'dialogs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    dialogid = db.Column(db.String(120), unique=True)
+    timestamp = db.Column(db.DateTime)
+
+    def __init__(self, name,dialogid):
+        self.dialogid = dialogid
+        self.name = name
+        #self.timestamp = timestamp
+
+    def __repr__(self):
+        return '<Dialog %r>' % self.name
 
 class User(db.Model):
     __tablename__ = 'users'
