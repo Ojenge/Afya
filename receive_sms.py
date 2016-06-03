@@ -33,7 +33,7 @@ def get_profile(number):
    user = User.query.filter_by(phone_number=number).first()
    return user
 
-def send_message(type,from_number,body):
+def send_message(type,from_number,to_number,body):
     if type == "Afyadevice":
         response = { "payload": { "success": "true", "task": "send",
         "messages": [
@@ -95,7 +95,7 @@ def receive_sms():
     if user:
         if not user.username:
             body = "Welcome to Afya, and what shall we call you?"
-            send_message(device,from_number,body)
+            send_message(device,from_number,to_number,body)
             #we then save the message
             message = Messages(text,dialogid=dialogid['dialog_id'],number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
             db.session.add(message)
