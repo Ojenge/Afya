@@ -100,7 +100,7 @@ def receive_sms():
         db.session.add(dialog)
         db.session.commit()
         body = "Welcome to Afya, and what shall we call you?"
-        message = Messages(text,dialogid=dialog.dialogid,number=from_number,timestamp=datetime.datetime.utcnow(),response=body,user=user)
+        message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user)
         db.session.add(message)
         db.session.commit()
         ret_response = send_message(device,from_number,to_number, body)

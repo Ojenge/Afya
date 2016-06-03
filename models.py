@@ -49,8 +49,13 @@ class Messages(db.Model):
     number = db.Column(db.String(120))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    def __init__(self, message, dialogid, number, **kwargs):
-        db.Model.__init__(self, message, dialogid, number, **kwargs)
+    def __init__(self, message, dialogid, number, respose, user):
+        self.message = message
+        self.dialogid = dialogid
+        self.number = number
+        self.response = response
+        self.user_id = user
+        self.timestamp = datetime.datetime.utcnow()
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
