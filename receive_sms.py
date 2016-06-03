@@ -106,7 +106,7 @@ def receive_sms():
         db.session.commit()
         ret_response = send_message(device,from_number,to_number, body)
     status = check_last_thread(from_number)
-    if status == 'onboard':
+    if status != 'onboard':
         user.username = text
         db.session.commit()
         body = "Okay,%s ask any question such as What is malaria" % (text) 
