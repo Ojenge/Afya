@@ -87,6 +87,7 @@ def receive_sms():
     dialog_file = open("resources/pizza_sample.xml", 'r')
     dialog = DialogUtils(app)
     #return "Text received"
+    body = "Hey I am Afyabot, your personnal health assistant"
     if get_profile(from_number):
         user = get_profile(from_number)
     else:
