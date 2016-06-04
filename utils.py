@@ -1,5 +1,6 @@
 import requests
 import jinja2
+import re
 from xml.etree import ElementTree
 from nltk import word_tokenize, pos_tag
 from difflib import SequenceMatcher
@@ -11,6 +12,20 @@ def similar(a, b):
 def search_disease(text):
     response = None
     result = search_medline(text)
+    if result:
+        response = result
+    return response
+
+def disease_symptoms(text):
+    response = None
+    result = search_medline_symptoms(text)
+    if result:
+        response = result
+    return response
+
+def disease_treatment(text):
+    response = None
+    result = search_medline_treatment(text)
     if result:
         response = result
     return response
@@ -51,6 +66,58 @@ def search_medline(text):
         definition = lines[:2]
         for item in definition:
             body = body + item + "."
+    except:
+        pass
+    return body
+
+def search_medline_symptoms(text):
+    body = ""
+    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+    regex = re.compile(".*(symptoms).*",re.IGNORECASE)
+    search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
+    if len(search) == 0 :
+        nouns.append("symptoms")
+    query_text = ""
+    for item in nouns:
+        query_text = query_text + " " + item
+    payload = {'db':'healthTopics','term': query_text}
+    try:
+        req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+        tree = ElementTree.fromstring(req.content)
+        rank = tree.find( './/*[@rank="0"]' )
+        content = rank.find('.//*[@name="FullSummary"]')
+        content = jinja2.filters.do_striptags(content.text)
+        symptom = re.search('symptoms',content, re.IGNORECASE)
+        if symptom:
+            sentence = re.findall(r"([^.]*?symptoms[^.]*\.)",content, re.IGNORECASE)
+            body = sentence[0]
+    except:
+        pass
+    return body
+
+def search_medline_treatment(text):
+    body = ""
+    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+    regex = re.compile(".*(treat).*",re.IGNORECASE)
+    search = [m.group(0) for l in nouns for m in [regex.search(l)] if m]
+    if len(search) == 0 :
+        nouns.append("treat")
+    query_text = ""
+    for item in nouns:
+        query_text = query_text + " " + item
+    payload = {'db':'healthTopics','term': query_text}
+    try:
+        req = requests.get("https://wsearch.nlm.nih.gov/ws/query", params=payload)
+        tree = ElementTree.fromstring(req.content)
+        rank = tree.find( './/*[@rank="0"]' )
+        content = rank.find('.//*[@name="FullSummary"]')
+        content = jinja2.filters.do_striptags(content.text)
+        treat = re.search('treat',content, re.IGNORECASE)
+        if treat:
+            sentence = re.findall(r"([^.]*?treat[^.]*\.)",content, re.IGNORECASE)
+        else:
+            sentence = re.findall(r"([^.]*?cure[^.]*\.)",content, re.IGNORECASE)
+        body = sentence[0]
     except:
         pass
     return body

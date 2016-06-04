@@ -142,6 +142,18 @@ def receive_sms():
             if body:
                 post_message(text,dialog.dialogid,from_number,body,user.id)
                 ret_response = send_message(device,from_number,to_number, body)
+        elif classification == 'DiseaseSymptoms':
+            dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
+            body = disease_symptoms(text)
+            if body:
+                post_message(text,dialog.dialogid,from_number,body,user.id)
+                ret_response = send_message(device,from_number,to_number, body)
+        elif classification == 'Treatment':
+            dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
+            body = disease_treatment(text)
+            if body:
+                post_message(text,dialog.dialogid,from_number,body,user.id)
+                ret_response = send_message(device,from_number,to_number, body)
         else:
             pass  
     return ret_response
