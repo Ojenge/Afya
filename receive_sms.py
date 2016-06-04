@@ -129,6 +129,8 @@ def receive_sms():
         body = "Okay, %s ask any question such as What is malaria" % (text)
         dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
         message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
+        db.session.add(message)
+        db.session.commit()
         ret_response = send_message(device,from_number,to_number, body)
     if status == 'process_questions':
         #now send it to watson to gets its classification
@@ -138,6 +140,8 @@ def receive_sms():
             body = search_disease(text)
             if body:
                 message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
+                db.session.add(message)
+                db.session.commit()
                 ret_response = send_message(device,from_number,to_number, body)
         else:
             pass  
