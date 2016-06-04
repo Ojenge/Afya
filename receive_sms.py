@@ -75,17 +75,17 @@ def check_last_thread(number):
     return status
 
 def classify(text):
-    class = ""
+    classification = None
     try:
         nlp = NLPUtils(app)
         classes = nlp.service.classify('3a84dfx64-nlc-5204', text)
         confidence = classes['classes'][0]['confidence']
         if confidence > 0.9:
-            class = classes['top_class']
+            classification = classes['top_class']
         ####to do we will need to add an else here to check low confidence levels
     except WatsonException as err:
         print err
-    return class
+    return classification
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
@@ -132,8 +132,8 @@ def receive_sms():
         ret_response = send_message(device,from_number,to_number, body)
     if status == 'process_questions':
         #now send it to watson to gets its classification
-        class = classify(text)
-        if class == 'SearchDisease':
+        classification = classify(text)
+        if classification == 'SearchDisease':
             dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
             body = search_disease(text)
             if body:
