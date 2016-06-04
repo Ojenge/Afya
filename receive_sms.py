@@ -28,6 +28,7 @@ db = SQLAlchemy(app)
 client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 
 from models import *
+from utils import *
 
 def get_profile(number):
    user = User.query.filter_by(phone_number=number).first()
@@ -67,11 +68,24 @@ def check_last_thread(number):
         if message.response == "Welcome to Afya, and what shall we call you?":
             status = 'ask_name'
         else:
-            status = 'welcome'
+            status = 'process_questions'
     else:
         print 'no messages registered yet'
         status = False
     return status
+
+def classify(text):
+    class = None
+    try:
+        nlp = NLPUtils(app)
+        classes = nlp.service.classify('3a84dfx64-nlc-5204', text)
+        confidence = classes['classes'][0]['confidence']
+        if confidence > 0.9:
+            class = classes['top_class']
+        ####to do we will need to add an else here to check low confidence levels
+    except WatsonException as err:
+        print err
+    return class
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
@@ -101,7 +115,6 @@ def receive_sms():
         db.session.commit()
         user = User.query.filter_by(phone_number=from_number).first()
         dialogid = dialog.createDialog(dialog_file, from_number)
-        print dialogid
         dialog = Dialog(name=from_number,dialogid=dialogid['dialog_id'])
         db.session.add(dialog)
         db.session.commit()
@@ -113,8 +126,21 @@ def receive_sms():
     if status == 'ask_name':
         user.username = text
         db.session.commit()
-        body = "Okay,%s ask any question such as What is malaria" % (text) 
+        body = "Okay, %s ask any question such as What is malaria" % (text)
+        dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
+        message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
         ret_response = send_message(device,from_number,to_number, body)
+    if status == 'process_questions':
+        #now send it to watson to gets its classification
+        class = classify(text)
+        if class == 'SearchDisease':
+            dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
+            body = search_disease(text)
+            if body:
+                message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
+                ret_response = send_message(device,from_number,to_number, body)
+        else:
+            pass  
     return ret_response
 
 @app.route("/report/", methods=['GET','POST'])
