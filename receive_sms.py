@@ -74,6 +74,11 @@ def check_last_thread(number):
         status = False
     return status
 
+def post_message(text,dialogid,number,body,userid):
+    message = Messages(message=text,dialogid=dialogid,number=number,response=body,user=userid)
+    db.session.add(message)
+    db.session.commit()
+
 def classify(text):
     classification = None
     try:
@@ -139,9 +144,10 @@ def receive_sms():
             dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
             body = search_disease(text)
             if body:
-                message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
-                db.session.add(message)
-                db.session.commit()
+                #message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
+                #db.session.add(message)
+                #db.session.commit()
+                post_message(text,dialog.dialogid,from_number,body,user.id)
                 ret_response = send_message(device,from_number,to_number, body)
         else:
             pass  
