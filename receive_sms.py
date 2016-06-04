@@ -75,7 +75,7 @@ def check_last_thread(number):
     return status
 
 def classify(text):
-    class = None
+    class = ""
     try:
         nlp = NLPUtils(app)
         classes = nlp.service.classify('3a84dfx64-nlc-5204', text)
