@@ -124,18 +124,14 @@ def receive_sms():
         db.session.add(dialog)
         db.session.commit()
         body = "Welcome to Afya, and what shall we call you?"
-        message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
-        db.session.add(message)
-        db.session.commit()
+        post_message(text,dialog.dialogid,from_number,body,user.id)
         ret_response = send_message(device,from_number,to_number, body)
     if status == 'ask_name':
         user.username = text
         db.session.commit()
         body = "Okay, %s ask any question such as What is malaria" % (text)
         dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
-        message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
-        db.session.add(message)
-        db.session.commit()
+        post_message(text,dialog.dialogid,from_number,body,user.id)
         ret_response = send_message(device,from_number,to_number, body)
     if status == 'process_questions':
         #now send it to watson to gets its classification
@@ -144,9 +140,6 @@ def receive_sms():
             dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
             body = search_disease(text)
             if body:
-                #message = Messages(message=text,dialogid=dialog.dialogid,number=from_number,response=body,user=user.id)
-                #db.session.add(message)
-                #db.session.commit()
                 post_message(text,dialog.dialogid,from_number,body,user.id)
                 ret_response = send_message(device,from_number,to_number, body)
         else:
