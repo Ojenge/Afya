@@ -114,9 +114,11 @@ def receive_sms():
     #we first get the last message
     status = check_last_thread(from_number)
     print status 
+    create_user = False
     if get_profile(from_number):
         user = get_profile(from_number)
     else:
+        create_user = True
         user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow())
         db.session.add(user)
         db.session.commit()
@@ -140,7 +142,7 @@ def receive_sms():
         dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
         post_message(text,dialog.dialogid,from_number,body,user.id)
         ret_response = send_message(device,from_number,to_number, body)
-    if status == 'process_questions':
+    if status == 'process_questions' and create_user is None:
         #now send it to watson to gets its classification
         classification = classify(text)
         if classification == 'SearchDisease':
