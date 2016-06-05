@@ -64,7 +64,7 @@ def send_message(type,from_number,to_number,body):
 def check_last_thread(number):
     if Messages.query.filter_by(number=number).order_by(Messages.id.desc()).first():
         message = Messages.query.filter_by(number=number).order_by(Messages.id.desc()).first()
-        user = get_profile(from_number)
+        user = get_profile(number)
         intro = "Great %s, feel free to ask me any health related questions you may have. I'm here to look after your well being. Remember, just like your doctor, the more you interact with me the more I learn about you to keep you healthy." % (user.username) 
         status = True
         if message.response == "Hello there! I'm Afya, your own personal health assistant. Before we get started can I ask you what your name is?":
