@@ -67,7 +67,7 @@ def check_last_thread(number):
         status = True
         if message.response == "Hello there! I'm Afya, your own personal health assistant. Before we get started can I ask you what your name is?":
             status = 'ask_name'
-        elif message.response.endswith("Remember, just like your doctor, the more you interact with me the more I learn about you to keep you healthy.)":
+        elif message.response.endswith("Remember, just like your doctor, the more you interact with me the more I learn about you to keep you healthy."):
             status = 'send_guide'
         else:
             status = 'process_questions'
