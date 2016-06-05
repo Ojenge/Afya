@@ -65,8 +65,10 @@ def check_last_thread(number):
     if Messages.query.filter_by(number=number).order_by(Messages.id.desc()).first():
         message = Messages.query.filter_by(number=number).order_by(Messages.id.desc()).first()
         status = True
-        if message.response == "Welcome to Afya, and what shall we call you?":
+        if message.response == "Hello there! I'm Afya, your own personal health assistant. Before we get started can I ask you what your name is?":
             status = 'ask_name'
+        elif message.response.endswith("Remember, just like your doctor, the more you interact with me the more I learn about you to keep you healthy.)":
+            status = 'send_guide'
         else:
             status = 'process_questions'
     else:
@@ -87,6 +89,8 @@ def classify(text):
         confidence = classes['classes'][0]['confidence']
         if confidence > 0.9:
             classification = classes['top_class']
+        else:
+            classification = 'low_classification'
         ####to do we will need to add an else here to check low confidence levels
     except WatsonException as err:
         print err
@@ -123,13 +127,18 @@ def receive_sms():
         dialog = Dialog(name=from_number,dialogid=dialogid['dialog_id'])
         db.session.add(dialog)
         db.session.commit()
-        body = "Welcome to Afya, and what shall we call you?"
+        body = "Hello there! I'm Afya, your own personal health assistant. Before we get started can I ask you what your name is?"
         post_message(text,dialog.dialogid,from_number,body,user.id)
         ret_response = send_message(device,from_number,to_number, body)
     if status == 'ask_name':
         user.username = text
         db.session.commit()
-        body = "Okay, %s ask any question such as What is malaria" % (text)
+        body = "Great %s, feel free to ask me any health related questions you may have. I'm here to look after your well being. Remember, just like your doctor, the more you interact with me the more I learn about you to keep you healthy." % (text)
+        dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
+        post_message(text,dialog.dialogid,from_number,body,user.id)
+        ret_response = send_message(device,from_number,to_number, body)
+    if status == 'send_guide':
+        body = "I specialize in questions such as 'What is malaria?' or 'What are symptoms of malaria?'. By asking me such questions, I can learn what's important to you"
         dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
         post_message(text,dialog.dialogid,from_number,body,user.id)
         ret_response = send_message(device,from_number,to_number, body)
@@ -139,22 +148,31 @@ def receive_sms():
         if classification == 'SearchDisease':
             dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
             body = search_disease(text)
-            if body:
-                post_message(text,dialog.dialogid,from_number,body,user.id)
-                ret_response = send_message(device,from_number,to_number, body)
+            if body is None:
+                body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.username)
+            post_message(text,dialog.dialogid,from_number,body,user.id)    
+            ret_response = send_message(device,from_number,to_number, body)
         elif classification == 'DiseaseSymptoms':
             dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
             body = disease_symptoms(text)
-            if body:
-                post_message(text,dialog.dialogid,from_number,body,user.id)
-                ret_response = send_message(device,from_number,to_number, body)
+            if body is None:
+                body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.username)
+            post_message(text,dialog.dialogid,from_number,body,user.id)
+            ret_response = send_message(device,from_number,to_number, body)
         elif classification == 'Treatment':
             dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
             body = disease_treatment(text)
-            if body:
-                post_message(text,dialog.dialogid,from_number,body,user.id)
-                ret_response = send_message(device,from_number,to_number, body)
+            if body is None:
+                body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.username)
+            post_message(text,dialog.dialogid,from_number,body,user.id)
+            ret_response = send_message(device,from_number,to_number, body)
+        elif classification == 'low_classification':
+            dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
+            body = 'Sorry I could not find anything on that, %s. Could you ask another question?' % (user.username)
+            post_message(text,dialog.dialogid,from_number,body,user.id)
+            ret_response = send_message(device,from_number,to_number, body)
         else:
+
             pass  
     return ret_response
 
