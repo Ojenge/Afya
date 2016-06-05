@@ -145,6 +145,7 @@ def receive_sms():
             body = search_disease(text)
             if body is None:
                 body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.username)
+            print body
             post_message(text,dialog.dialogid,from_number,body,user.id)    
             ret_response = send_message(device,from_number,to_number, body)
         elif classification == 'DiseaseSymptoms':
