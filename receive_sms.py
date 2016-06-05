@@ -114,7 +114,7 @@ def receive_sms():
     #we first get the last message
     status = check_last_thread(from_number)
     print status 
-    create_user = False
+    create_user = None
     if get_profile(from_number):
         user = get_profile(from_number)
     else:
