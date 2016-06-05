@@ -67,8 +67,6 @@ def check_last_thread(number):
         status = True
         if message.response == "Hello there! I'm Afya, your own personal health assistant. Before we get started can I ask you what your name is?":
             status = 'ask_name'
-        elif message.response is None:
-            status = 'send_guide'
         else:
             status = 'process_questions'
     else:
@@ -137,7 +135,7 @@ def receive_sms():
         dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
         post_message(text,dialog.dialogid,from_number,body,user.id)
         ret_response = send_message(device,from_number,to_number, body)
-    if status == 'send_guide':
+        return ret_response
         body = "I specialize in questions such as 'What is malaria?' or 'What are symptoms of malaria?'. By asking me such questions, I can learn what's important to you"
         dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
         post_message(text,dialog.dialogid,from_number,body,user.id)
