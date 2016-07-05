@@ -27,7 +27,7 @@ class User(db.Model):
     firstname = db.Column(db.String(80))
     lastname = db.Column(db.String(120))
     email = db.Column(db.String(120), unique=True)
-    phone_number = db.Column(db.String(120), unique=True)
+    phone_number = db.Column(db.String(120))
     facebook_id = db.Column(db.String(250), unique=True)
     dialog_id = db.Column(db.String(250), unique=True)  
     timestamp = db.Column(db.DateTime)
