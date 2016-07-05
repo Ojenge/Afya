@@ -34,10 +34,10 @@ class User(db.Model):
     messages = db.relationship('Messages', backref='user', lazy='dynamic')
 
 
-    def __init__(self, phone_number,timestamp, facebook_id):
+    def __init__(self, timestamp, facebook_id):
         #self.username = username
         #self.email = email
-        self.phone_number = phone_number
+        #self.phone_number = phone_number
         self.timestamp = timestamp
         self.facebook_id = facebook_id
 

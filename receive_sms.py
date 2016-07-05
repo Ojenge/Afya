@@ -53,8 +53,7 @@ def get_fb_profile(fbid):
    return user_details
 
 def create_user(sender,user_details):
-    from_number = "from_facebook"
-    user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow(),facebook_id=sender)
+    user = User(timestamp=datetime.datetime.utcnow(),facebook_id=sender)
     db.session.add(user)
     db.session.commit()
     user = get_fb_user_profile(sender)
