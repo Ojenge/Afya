@@ -10,6 +10,7 @@ import nltk
 import jinja2
 import json
 import datetime
+import traceback
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 from xml.etree import ElementTree
@@ -27,12 +28,57 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 
+ACCESS_TOKEN =  os.environ['FACEBOOK_ACCESS_TOKEN']
+VERIFY_TOKEN =  os.environ['FACEBOOK_VERIFY_TOKEN']
+
+#ACCESS_TOKEN = "EAAW2qV8uIzIBAIjpfZCPaqxVkCQoJYwVeuZAFDfMCsqp7IXAA9kp5oRUUggVCwdcJOPt28d2OCaxAYOJ1UrTpWMPCDRq35n7u2oHaeL1KJ8ltKMrLX6Q3lDOdWBgLuXwuCZCn8xH3VUyAKDGRPlDFlvc9t2HaTZCyhibASUvmK1xATBRsn8m"
+#VERIFY_TOKEN = "secret"
+
+
 from models import *
 from utils import *
 
 def get_profile(number):
    user = User.query.filter_by(phone_number=number).first()
    return user
+
+def get_fb_user_profile(fid):
+   user = User.query.filter_by(facebook_id=fid).first()
+   return user
+
+def get_fb_profile(fbid):
+   user_details_url = "https://graph.facebook.com/v2.6/%s"%fbid
+   user_details_params = {'fields':'first_name,last_name,profile_pic', 'access_token': ACCESS_TOKEN}
+   user_details = requests.get(user_details_url, user_details_params).json()
+   return user_details
+
+def create_user(sender,user_details):
+    from_number = "from_facebook"
+    user = User(phone_number=from_number,timestamp=datetime.datetime.utcnow(),facebook_id=sender)
+    db.session.add(user)
+    db.session.commit()
+    user = get_fb_user_profile(sender)
+    dialog_file = open("resources/pizza_sample.xml", 'r')
+    dialog = DialogUtils(app)
+    dialogid = dialog.createDialog(dialog_file, sender)
+    dialog = Dialog(name=sender,dialogid=dialogid['dialog_id'])
+    db.session.add(dialog)
+    user.firstname = user_details['first_name']
+    user.lastname = user_details['last_name']
+    user.dialog_id = dialog.dialogid
+    print dialog.dialogid
+    db.session.commit()
+    return user
+
+def check_conversations(user):
+    if Messages.query.filter_by(user_id=user.id).order_by(Messages.id.desc()).first():
+        print "some messages have come in"
+        status = True
+    else:
+        print 'no messages registered yet, send them a welcome'
+        status = False
+    return status
+    
 
 def send_message(type,from_number,to_number,body):
     if type == "Afyadevice":
@@ -78,6 +124,21 @@ def post_message(text,dialogid,number,body,userid):
     message = Messages(message=text,dialogid=dialogid,number=number,response=body,user=userid)
     db.session.add(message)
     db.session.commit()
+
+def save_fb_message(message,dialogid,number,userid):
+    message = Messages(message=message,dialogid=dialogid,number=number,user=userid)
+    db.session.add(message)
+    db.session.commit()
+    return message
+
+def save_fb_response(message,dialogid,response,user):
+    response = Response(message=message, dialogid=dialogid,response=response,user=user)
+    db.session.add(response)
+    db.session.commit()
+
+def chunkstring(string, length):
+    return (string[0+i:length+i] for i in range(0, len(string), length))
+
 
 def classify(text):
     classification = None
@@ -190,10 +251,101 @@ def report():
     print "From : %s To : %s Status : %s MessageUUID : %s" % (from_number, to_number, status,uuid)
     return "Delivery reported"
 
-@app.route('/')
-def kenyan_numbers():
-    print request.values.get('task')
-    return 'Hello World!'
+def reply(user_id, msg):
+    data = {
+        "recipient": {"id": user_id},
+        "message": {"text": msg}
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    return resp
+
+
+@app.route('/', methods=['GET'])
+def handle_verification():
+    if request.args['hub.verify_token'] == VERIFY_TOKEN:
+        return request.args['hub.challenge']
+    else:
+        return "Invalid verification token"
+
+
+@app.route('/', methods=['POST'])
+def handle_incoming_messages():
+    try:
+      data = json.loads(request.data)
+      print 'here'
+      text = data['entry'][0]['messaging'][0]['message']['text'] # Incoming Message Text
+      sender = data['entry'][0]['messaging'][0]['sender']['id'] # Sender ID
+      user_details= get_fb_profile(sender)
+      user = get_fb_user_profile(sender)
+      user_firstname = user_details['first_name']
+      if not user:
+          #we create the user in our users table
+          user = create_user(sender,user_details)
+      # we not need to know if this is a continuing convo or new
+      status = check_conversations(user)
+      if status is False:
+          message = save_fb_message(text,user.dialog_id,"from_facebook",user.id)
+          text = "Great %s, feel free to ask me any health related questions you may have. I'm here to look after your well being." % (user_firstname)
+          response = reply(sender, text)
+          if response.status_code == 200:
+              save_fb_response(message,user.dialog_id,text,user.id)
+              text = "I specialize in questions such as 'What is malaria?' or 'What are symptoms of malaria?'. By asking me such questions, I can learn what's important to you"
+              response = reply(sender, text)
+              save_fb_response(message,user.dialog_id,text,user.id)
+      else:
+          message = save_fb_message(text,user.dialog_id,"from_facebook",user.id)
+          #now send it to watson to gets its classification
+          classification = classify(text)
+          if classification == 'SearchDisease':
+              body = search_disease(text)
+              if body is None:
+                  body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.firstname)
+              if len(body) > 320:
+                  lists = list(chunkstring(body, 320))
+                  for chunk in lists:
+                      response = reply(sender, chunk)
+                      save_fb_response(message,user.dialog_id,chunk,user.id)
+              else: 
+                  response = reply(sender, body)
+                  save_fb_response(message,user.dialog_id,body,user.id)
+          elif classification == 'DiseaseSymptoms':
+              body = disease_symptoms(text)
+              if body is None:
+                  body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.firstname)
+              if len(body) > 320:
+                  lists = list(chunkstring(body, 320))
+                  for chunk in lists:
+                      response = reply(sender, chunk)
+                      save_fb_response(message,user.dialog_id,chunk,user.id)
+              else: 
+                  response = reply(sender, body)
+                  save_fb_response(message,user.dialog_id,body,user.id)
+          elif classification == 'Treatment':
+              body = disease_treatment(text)
+              if body is None:
+                  body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.firstname)
+              if len(body) > 320:
+                  lists = list(chunkstring(body, 320))
+                  for chunk in lists:
+                      response = reply(sender, chunk)
+                      save_fb_response(message,user.dialog_id,chunk,user.id)
+              else: 
+                  response = reply(sender, body)
+                  save_fb_response(message,user.dialog_id,body,user.id)
+          elif classification == 'low_classification':
+              body = 'Sorry I could not find anything on that, %s. Could you ask another question?' % (user.firstname)
+              response = reply(sender, body)
+              save_fb_response(message,user.dialog_id,body,user.id)
+          else:
+              pass
+           
+      #payload = {'recipient': {'id': sender}, 'message': {'text': text}} # We're going to send this back
+      #r = requests.post('https://graph.facebook.com/v2.6/me/messages/?access_token=' + ACCESS_TOKEN, json=payload) # Lets send it
+      #print r.content
+    except Exception as e:
+      print traceback.format_exc() # something went wrong
+    return "Hello Worlds" #Not Really Necessary
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
