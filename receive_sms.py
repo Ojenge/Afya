@@ -295,6 +295,8 @@ def handle_incoming_messages():
           message = save_fb_message(text,user.dialog_id,"from_facebook",user.id)
           #now send it to watson to gets its classification
           classification = classify(text)
+          #we remove the question mark when folks ask questions, WILL NEED to resolve this comprehensively in future
+          text = text.replace('?', '')
           if classification == 'SearchDisease':
               body = search_disease(text)
               if body is None:
