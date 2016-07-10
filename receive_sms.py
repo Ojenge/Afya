@@ -202,7 +202,7 @@ def receive_sms():
     if status == 'ask_name':
         user.username = text
         db.session.commit()
-        body = "Great %s, feel free to ask me any health related questions you may have. I'm here to look after your well being. Remember, just like your doctor, the more you interact with me the more I learn about you to keep you healthy.I specialize in questions such as 'What is malaria?' or 'What are symptoms of malaria?'. By asking me such questions, I can learn what's important to you" % (text)
+        body = "Welcome %s, feel free to ask me any health related questions you may have. I'm here to look after your well being. Remember, just like your doctor, the more you interact with me the more I learn about you to keep you healthy.I specialize in questions such as 'What is malaria?' or 'What are symptoms of malaria?'. By asking me such questions, I can learn what's important to you" % (text)
         dialog = Dialog.query.filter_by(name=from_number).order_by(Dialog.id.desc()).first()
         post_message(text,dialog.dialogid,from_number,body,user.id)
         ret_response = send_message(device,from_number,to_number, body)
