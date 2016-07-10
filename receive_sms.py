@@ -11,6 +11,7 @@ import jinja2
 import json
 import datetime
 import traceback
+import random
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 from xml.etree import ElementTree
@@ -149,6 +150,14 @@ def classify(text):
             classification = classes['top_class']
         else:
             classification = 'low_classification'
+            #class_response = nlp.service.classify('c115edx72-nlc-1770', text)
+            #confidence_response = class_response['classes'][0]['confidence']
+            #if confidence_response > 0.9:
+            #    if class_response['top_class'] == 'YES':
+            #        classification = 'SendYes'
+            #    if class_response['top_class'] == 'NO':
+            #        classification = 'SendNo'
+       
         ####to do we will need to add an else here to check low confidence levels
     except WatsonException as err:
         print err
@@ -259,6 +268,33 @@ def reply(user_id, msg):
     return resp
 
 
+def reply_button(user_id, msg):
+    data = {
+        "recipient": {"id": user_id},
+        "message": {
+          "attachment":{
+            "type":"template", 
+            "payload":{
+              "template_type":"button",
+              "text":msg,
+              "buttons": [{
+                "type":"postback",
+                "title":"Yes",
+                "payload": "YES"
+               },{
+                "type":"postback",
+                "title":"No",
+                "payload": "NO"
+               }]
+              }
+          }
+        }
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    print resp.content
+    return resp
+
+
 @app.route('/', methods=['GET'])
 def handle_verification():
     if request.args['hub.verify_token'] == VERIFY_TOKEN:
@@ -272,6 +308,19 @@ def handle_incoming_messages():
     try:
       data = json.loads(request.data)
       print 'here'
+      #we check for any response payloads
+      response_payloads = data['entry'][0]['messaging'][0]
+      if 'postback' in response_payloads.keys():
+          answer = response_payloads['postback']['payload']
+          sender = response_payloads['sender']['id']
+          user = get_fb_user_profile(sender) 
+          if answer == "YES":
+              res = "Ok great, I'm glad I could help %s. Please ask me anything else you have on your mind. I'm here to provide you quick access to the information that matters, your health." % (user.firstname)
+              reply(sender,res)
+          if answer == 'NO':
+              res = "I'm sorry about that %s, can you ask your question a different way?" % (user.firstname)
+              reply(sender,res)
+
       text = data['entry'][0]['messaging'][0]['message']['text'] # Incoming Message Text
       sender = data['entry'][0]['messaging'][0]['sender']['id'] # Sender ID
       user_details= get_fb_profile(sender)
@@ -297,34 +346,57 @@ def handle_incoming_messages():
           classification = classify(text)
           #we remove the question mark when folks ask questions, WILL NEED to resolve this comprehensively in future
           text = text.replace('?', '')
+          body_exists = True
           if classification == 'SearchDisease':
               body = search_disease(text)
               if body is None:
+                  body_exists = False
                   body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.firstname)
+              if body_exists:
+                  reply_sentences = ["I'm glad I can help. Here's an answer I found", "Here is what I found, %s" % (user.firstname),
+                                     "Here is what I found. I hope this is useful", "I hope this answer helps %s" % (user.firstname)]
+                  sentence = random.choice(reply_sentences)
+                  reply(sender,sentence)
               if len(body) > 320:
                   lists = list(chunkstring(body, 320))
                   for chunk in lists:
                       response = reply(sender, chunk)
                       save_fb_response(message,user.dialog_id,chunk,user.id)
-              else: 
+              else:
                   response = reply(sender, body)
                   save_fb_response(message,user.dialog_id,body,user.id)
+              if body_exists:
+                  reply_button(sender, "Did this help?")
           elif classification == 'DiseaseSymptoms':
               body = disease_symptoms(text)
               if body is None:
+                  body_exists = False 
                   body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.firstname)
+              if body_exists:
+                  reply_sentences = ["I'm glad I can help. Here's an answer I found", "Here is what I found, %s" % (user.firstname),
+                                     "Here is what I found. I hope this is useful", "I hope this answer helps %s" % (user.firstname)]
+                  sentence = random.choice(reply_sentences)
+                  reply(sender,sentence)
               if len(body) > 320:
                   lists = list(chunkstring(body, 320))
                   for chunk in lists:
                       response = reply(sender, chunk)
                       save_fb_response(message,user.dialog_id,chunk,user.id)
-              else: 
+              else:
                   response = reply(sender, body)
                   save_fb_response(message,user.dialog_id,body,user.id)
+              if body_exists:
+                  reply_button(sender, "Did this help?")
           elif classification == 'Treatment':
               body = disease_treatment(text)
               if body is None:
+                  body_exists = False
                   body = "Hm sorry about this %s, but it seems I can't find anything on that. I will however remember that this is important for you. Could you ask another question?" % (user.firstname)
+              if body_exists:
+                  reply_sentences = ["I'm glad I can help. Here's an answer I found", "Here is what I found, %s" % (user.firstname),
+                                     "Here is what I found. I hope this is useful", "I hope this answer helps %s" % (user.firstname)]
+                  sentence = random.choice(reply_sentences)
+                  reply(sender,sentence)
               if len(body) > 320:
                   lists = list(chunkstring(body, 320))
                   for chunk in lists:
@@ -333,6 +405,14 @@ def handle_incoming_messages():
               else: 
                   response = reply(sender, body)
                   save_fb_response(message,user.dialog_id,body,user.id)
+              if body_exists:
+                  reply_button(sender, "Did this help?")          
+          elif classification == 'SendYes':
+                  res = "Ok great, I'm glad I could help %s. Please ask me anything else you have on your mind. I'm here to provide you quick access to the information that matters, your health." % (user.firstname)
+                  reply(sender,res)
+          elif classification == 'SendNo':
+                  res = "I'm sorry about that %s, can you ask your question a different way?" % (user.firstname)
+                  reply(sender,res)
           elif classification == 'low_classification':
               body = 'Sorry I could not find anything on that, %s. Could you ask another question?' % (user.firstname)
               response = reply(sender, body)
