@@ -1,5 +1,6 @@
 import requests
 import jinja2
+import json
 import re
 from xml.etree import ElementTree
 from nltk import word_tokenize, pos_tag
@@ -11,21 +12,27 @@ def similar(a, b):
 
 def search_disease(text):
     response = None
-    result = search_medline(text)
+    result = search_afyarestinfo(text)
+    if result is None:
+        result = search_medline(text)
     if result:
         response = result
     return response
 
 def disease_symptoms(text):
     response = None
-    result = search_medline_symptoms(text)
+    result = search_afyarest_symptoms(text)
+    if result is None:
+        result = search_medline_symptoms(text)
     if result:
         response = result
     return response
 
 def disease_treatment(text):
     response = None
-    result = search_medline_treatment(text)
+    result = search_afyarest_treatment(text)
+    if result is None:
+        result = search_medline_treatment(text)
     if result:
         response = result
     return response
@@ -121,3 +128,59 @@ def search_medline_treatment(text):
     except:
         pass
     return body
+
+def search_afyarestinfo(text):
+    body = None
+    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+    query_text = ""
+    for item in nouns:
+        query_text = query_text + " " + item
+    if query_text is "":
+        foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
+        for item in foreign:
+            query_text = query_text + " " + item
+    request = requests.post('http://afyarest.herokuapp.com/search', data = {'querytype': 'diseaseinfo', 'query': query_text})
+    result = json.loads(request.content)
+    try:
+        body = result[0]['fields']['diseaseinfo']
+    except:
+        body
+    return body
+
+def search_afyarest_symptoms(text):
+    body = None
+    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+    query_text = ""
+    for item in nouns:
+        query_text = query_text + " " + item
+    if query_text is "":
+        foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
+        for item in foreign:
+            query_text = query_text + " " + item
+    request = requests.post('http://afyarest.herokuapp.com/search', data = {'querytype': 'diseasesymptoms', 'query': query_text})
+    result = json.loads(request.content)
+    try:
+        body = result[0]['fields']['diseasesymptoms']
+    except:
+        body
+    return body
+
+def search_afyarest_treatment(text):
+    body = None
+    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+    query_text = ""
+    for item in nouns:
+        query_text = query_text + " " + item
+    if query_text is "":
+        foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
+        for item in foreign:
+            query_text = query_text + " " + item
+    request = requests.post('http://afyarest.herokuapp.com/search', data = {'querytype': 'diseasecure', 'query': query_text})
+    result = json.loads(request.content)
+    try:
+        body = result[0]['fields']['diseasetreat']
+    except:
+        body
+    return body
+
+

@@ -418,8 +418,9 @@ def handle_incoming_messages():
               response = reply(sender, body)
               save_fb_response(message,user.dialog_id,body,user.id)
           else:
-              pass
-           
+              body = 'Sorry I could not find anything on that, %s. Could you ask another question?' % (user.firstname)
+              response = reply(sender, body)
+              save_fb_response(message,user.dialog_id,body,user.id)
       #payload = {'recipient': {'id': sender}, 'message': {'text': text}} # We're going to send this back
       #r = requests.post('https://graph.facebook.com/v2.6/me/messages/?access_token=' + ACCESS_TOKEN, json=payload) # Lets send it
       #print r.content
