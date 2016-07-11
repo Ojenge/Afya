@@ -333,7 +333,7 @@ def handle_incoming_messages():
       status = check_conversations(user)
       if status is False:
           message = save_fb_message(text,user.dialog_id,"from_facebook",user.id)
-          text = "Great %s, feel free to ask me any health related questions you may have. I'm here to look after your well being." % (user_firstname)
+          text = "Welcome %s, feel free to ask me any health related questions you may have. I'm here to look after your well being." % (user_firstname)
           response = reply(sender, text)
           if response.status_code == 200:
               save_fb_response(message,user.dialog_id,text,user.id)
