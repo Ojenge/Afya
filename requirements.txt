@@ -12,3 +12,5 @@ Flask-SQLAlchemy==2.1
 Flask-Migrate==1.8.0
 wolframalpha
 nltk
+lxml==3.6.0
+

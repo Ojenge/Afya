@@ -5,7 +5,7 @@ import re
 from xml.etree import ElementTree
 from nltk import word_tokenize, pos_tag
 from difflib import SequenceMatcher
-
+from lxml import etree
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -36,6 +36,36 @@ def disease_treatment(text):
     if result:
         response = result
     return response
+
+
+def search_ctakes_disorder(root,begin,end):
+    disease = None
+    nsmap = {k:v for k,v in root.nsmap.iteritems() if k}
+    words = root.findall('syntax:TerminalTreebankNode', nsmap)
+    for word in words:
+        if word.get('begin') == begin and word.get('end') == end:
+            disease = word.get('nodeValue')
+    return disease
+
+
+def get_disorder_ctakes(text):
+    data = {'q': text, 'format':'xml'}
+    disease=None
+    try:
+        r = requests.post("http://52.27.22.206:8080/DemoServlet", data=data)
+        tree = etree.fromstring(r.content)
+        tree = etree.ElementTree(tree)
+        root = tree.getroot()
+        nsmap = {k:v for k,v in root.nsmap.iteritems() if k}
+        disorder = root.findall('textsem:DiseaseDisorderMention',nsmap)
+        if disorder:
+            for item in disorder:
+                begin = item.get('begin')
+                end = item.get('end')
+                disease = search_ctakes_disorder(root,begin,end)
+    except:
+        pass
+    return disease
 
 def search_medline(text):
     body = ""
@@ -131,14 +161,17 @@ def search_medline_treatment(text):
 
 def search_afyarestinfo(text):
     body = None
-    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
-    query_text = ""
-    for item in nouns:
-        query_text = query_text + " " + item
-    if query_text is "":
-        foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
-        for item in foreign:
+    if get_disorder_ctakes(text):
+        query_text = get_disorder_ctakes(text)
+    else:
+        nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+        query_text = ""
+        for item in nouns:
             query_text = query_text + " " + item
+        if query_text is "":
+            foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
+            for item in foreign:
+                query_text = query_text + " " + item
     request = requests.post('http://afyarest.herokuapp.com/search', data = {'querytype': 'diseaseinfo', 'query': query_text})
     result = json.loads(request.content)
     try:
@@ -149,14 +182,17 @@ def search_afyarestinfo(text):
 
 def search_afyarest_symptoms(text):
     body = None
-    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
-    query_text = ""
-    for item in nouns:
-        query_text = query_text + " " + item
-    if query_text is "":
-        foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
-        for item in foreign:
+    if get_disorder_ctakes(text):
+        query_text = get_disorder_ctakes(text)
+    else:
+        nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+        query_text = ""
+        for item in nouns:
             query_text = query_text + " " + item
+        if query_text is "":
+            foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
+            for item in foreign:
+                query_text = query_text + " " + item
     request = requests.post('http://afyarest.herokuapp.com/search', data = {'querytype': 'diseasesymptoms', 'query': query_text})
     result = json.loads(request.content)
     try:
@@ -167,14 +203,17 @@ def search_afyarest_symptoms(text):
 
 def search_afyarest_treatment(text):
     body = None
-    nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
-    query_text = ""
-    for item in nouns:
-        query_text = query_text + " " + item
-    if query_text is "":
-        foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
-        for item in foreign:
+    if get_disorder_ctakes(text):
+        query_text = get_disorder_ctakes(text)
+    else:
+        nouns = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('N')]
+        query_text = ""
+        for item in nouns:
             query_text = query_text + " " + item
+        if query_text is "":
+            foreign = [token for token, pos in pos_tag(word_tokenize(text)) if pos.startswith('FW')]
+            for item in foreign:
+                query_text = query_text + " " + item
     request = requests.post('http://afyarest.herokuapp.com/search', data = {'querytype': 'diseasecure', 'query': query_text})
     result = json.loads(request.content)
     try:
@@ -182,5 +221,3 @@ def search_afyarest_treatment(text):
     except:
         body
     return body
-
-

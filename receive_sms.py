@@ -31,6 +31,8 @@ client = wolframalpha.Client('L38Q2P-K67YKTJ88X')
 
 ACCESS_TOKEN =  os.environ['FACEBOOK_ACCESS_TOKEN']
 VERIFY_TOKEN =  os.environ['FACEBOOK_VERIFY_TOKEN']
+WATSON_CLASSIFIER_ID = os.environ['WATSON_CLASSIFIER_ID']
+WATSON_COMM_CLASSIFIER = os.environ['WATSON_COMM_CLASSIFIER']
 
 #ACCESS_TOKEN = "EAAW2qV8uIzIBAIjpfZCPaqxVkCQoJYwVeuZAFDfMCsqp7IXAA9kp5oRUUggVCwdcJOPt28d2OCaxAYOJ1UrTpWMPCDRq35n7u2oHaeL1KJ8ltKMrLX6Q3lDOdWBgLuXwuCZCn8xH3VUyAKDGRPlDFlvc9t2HaTZCyhibASUvmK1xATBRsn8m"
 #VERIFY_TOKEN = "secret"
@@ -144,7 +146,7 @@ def classify(text):
     classification = None
     try:
         nlp = NLPUtils(app)
-        classes = nlp.service.classify('3a84dfx64-nlc-5204', text)
+        classes = nlp.service.classify(WATSON_CLASSIFIER_ID, text)
         confidence = classes['classes'][0]['confidence']
         if confidence > 0.9:
             classification = classes['top_class']
@@ -417,6 +419,31 @@ def handle_incoming_messages():
               body = 'Sorry I could not find anything on that, %s. Could you ask another question?' % (user.firstname)
               response = reply(sender, body)
               save_fb_response(message,user.dialog_id,body,user.id)
+          elif classification == 'Help':
+              body = "I'm here to help %s, feel free to ask me any health related questions you may have. I'm here to look after your well being. I specialize in questions such as 'What is malaria?' or 'What are symptoms of malaria?'. By asking me such questions, I can learn what's important to you" % (user.firstname)
+              response = reply(sender, body)
+              save_fb_response(message,user.dialog_id,body,user.id)
+          elif classification == 'Greeting':
+              try:
+                  nlp2 = NLPUtils(app)
+                  classes = nlp2.service.classify(WATSON_COMM_CLASSIFIER, text)
+                  confidence = classes['classes'][0]['confidence']
+                  classification = classes['top_class']
+                  if classification == 'Welcome':
+                      reply_sentences = ["Hey %s!, how can I help you today? Ask me a question" % (user.firstname), "Howdy %s. go and ask me a question" % (user.firstname),"Hello %s, hope the day is going well, how can I help?" % (user.firstname), "Hello %s, nice to hear from you. What's on your mind?" % (user.firstname)]
+                      sentence = random.choice(reply_sentences)
+                      response = reply(sender, sentence)
+                      save_fb_response(message,user.dialog_id,sentence,user.id)
+                  elif classification == 'Farewell':
+                      body = 'Bye %s, take care of yourself and have a nice day. Let me know if I can help later' % (user.firstname)
+                      response = reply(sender, body)
+                      save_fb_response(message,user.dialog_id,body,user.id)
+                  elif classification == 'Goodbye':
+                      body = 'Your welcome %s, let me know if I can help' % (user.firstname)
+                      response = reply(sender, body)
+                      save_fb_response(message,user.dialog_id,body,user.id)
+              except:
+                  pass
           else:
               body = 'Sorry I could not find anything on that, %s. Could you ask another question?' % (user.firstname)
               response = reply(sender, body)
