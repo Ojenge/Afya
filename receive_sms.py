@@ -12,7 +12,7 @@ import json
 import datetime
 import traceback
 import random
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
 from xml.etree import ElementTree
 
@@ -164,6 +164,11 @@ def classify(text):
     except WatsonException as err:
         print err
     return classification
+
+@app.route("/policy/", methods=['GET'])
+def policy():
+    return render_template('policy.html')  # render a template
+ 
 
 @app.route("/receive_sms/", methods=['GET','POST'])
 def receive_sms():
