@@ -40,11 +40,11 @@ WATSON_COMM_CLASSIFIER = os.environ['WATSON_COMM_CLASSIFIER']
 
 from models import *
 from utils import *
-
+# use the phone number to build a profile for sms
 def get_profile(number):
    user = User.query.filter_by(phone_number=number).first()
    return user
-
+# same here for FB
 def get_fb_user_profile(fid):
    user = User.query.filter_by(facebook_id=fid).first()
    return user
@@ -54,7 +54,7 @@ def get_fb_profile(fbid):
    user_details_params = {'fields':'first_name,last_name,profile_pic', 'access_token': ACCESS_TOKEN}
    user_details = requests.get(user_details_url, user_details_params).json()
    return user_details
-
+# Profile is built here from above
 def create_user(sender,user_details):
     user = User(timestamp=datetime.datetime.utcnow(),facebook_id=sender)
     db.session.add(user)
@@ -71,7 +71,7 @@ def create_user(sender,user_details):
     print dialog.dialogid
     db.session.commit()
     return user
-
+# check if there are existing conversations first. If not send a welcome note to them
 def check_conversations(user):
     if Messages.query.filter_by(user_id=user.id).order_by(Messages.id.desc()).first():
         print "some messages have come in"
@@ -81,7 +81,8 @@ def check_conversations(user):
         status = False
     return status
     
-
+# basic send message function
+# still using heroku
 def send_message(type,from_number,to_number,body):
     if type == "Afyadevice":
         response = { "payload": { "success": "true", "task": "send",

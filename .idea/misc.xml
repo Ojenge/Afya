@@ -13,4 +13,7 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" default="true" project-jdk-name="Python 2.7.10 virtualenv at ~/skeleton" project-jdk-type="Python SDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
+  <component name="PythonCompatibilityInspectionAdvertiser">
+    <option name="version" value="2" />
+  </component>
 </project>
