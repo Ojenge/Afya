@@ -1,0 +1,10 @@
+#!/Users/collinsojenge/projects/afya/bin/python2.7
+# EASY-INSTALL-ENTRY-SCRIPT: 'newrelic==2.80.1.61','console_scripts','newrelic-admin'
+__requires__ = 'newrelic==2.80.1.61'
+import sys
+from pkg_resources import load_entry_point
+
+if __name__ == '__main__':
+    sys.exit(
+        load_entry_point('newrelic==2.80.1.61', 'console_scripts', 'newrelic-admin')()
+    )
